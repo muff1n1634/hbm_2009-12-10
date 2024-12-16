@@ -36,7 +36,12 @@ typedef int				BOOL;
 
 // Other types
 
-typedef unsigned char	byte_t;
+typedef unsigned long int	byte4_t;
+typedef unsigned short int	byte2_t;
+typedef unsigned char		byte1_t;
+
+typedef byte1_t				byte_t;
+
 typedef unsigned int	register_t;
 
 #endif // TYPES_H
