@@ -42,6 +42,9 @@ ATTR_WEAK void OSPanic(const char *file, int line, const char *msg, ...);
 #define OSError_Line(line_, ...)	\
 	OSError_FileLine(__FILE__, line_, __VA_ARGS__)
 
+typedef s64 OSTime;
+typedef u32 OSTick;
+
 static inline f32 __OSu16tof32(const u16 *arg)
 {
 	f32 ret;
@@ -71,6 +74,68 @@ static inline void OSu16tof32(const u16 *in, f32 *out)
 {
 	*out = __OSu16tof32(in);
 }
+
+typedef struct OSAlarm OSAlarm;
+typedef struct OSContext OSContext;
+
+typedef void OSAlarmHandler(OSAlarm *alarm, OSContext *context);
+
+// [SPQE7T]/ISpyD.elf:.debug_info::0x2950d7
+struct OSAlarm
+{
+	OSAlarmHandler	*handler;	// size 0x04, offset 0x00
+	u32				tag;		// size 0x04, offset 0x04
+	OSTime			fire;		// size 0x08, offset 0x08
+	OSAlarm			*prev;		// size 0x04, offset 0x10
+	OSAlarm			*next;		// size 0x04, offset 0x14
+	OSTime			period;		// size 0x08, offset 0x18
+	OSTime			start;		// size 0x08, offset 0x20
+	void			*userData;	// size 0x04, offset 0x28
+	/* 4 bytes padding */
+}; // size 0x30
+
+void OSCreateAlarm(OSAlarm *alarm);
+void OSSetAlarm(OSAlarm *alarm, OSTime tick, OSAlarmHandler handler);
+void OSCancelAlarm(OSAlarm *alarm);
+void OSSetAlarmUserData(OSAlarm *alarm, void *userData);
+void *OSGetAlarmUserData(const OSAlarm *alarm);
+
+#define OSGetAlarmUserDataAny(type_, alarm_)	\
+	((type_)(OSGetAlarmUserData(alarm_)))
+
+#define OSSetAlarmUserDataAny(alarm_, data_)	\
+	OSSetAlarmUserData(alarm_, (void *)(data_))
+
+extern u32 OS_BUS_CLOCK ATTR_ADDRESS(0x800000f8);
+
+#define OS_TIMER_CLOCK	(OS_BUS_CLOCK / 4)
+
+// clang-format off
+#define OSTicksToSeconds(ticks)			((ticks)        / (OS_TIMER_CLOCK         )       )
+#define OSTicksToMilliseconds(ticks)	((ticks)        / (OS_TIMER_CLOCK / 1000  )       )
+#define OSTicksToMicroseconds(ticks)	((ticks) * 8    / (OS_TIMER_CLOCK / 125000)       )
+#define OSTicksToNanoseconds(ticks)		((ticks) * 8000 / (OS_TIMER_CLOCK / 125000)       )
+
+#define OSSecondsToTicks(sec)			((  sec)        * (OS_TIMER_CLOCK         )       )
+#define OSMillisecondsToTicks(msec)		(( msec)        * (OS_TIMER_CLOCK / 1000  )       )
+#define OSMicrosecondsToTicks(usec)		(( usec)        * (OS_TIMER_CLOCK / 125000) / 8   )
+#define OSNanosecondsToTicks(nsec)		(( nsec)        * (OS_TIMER_CLOCK / 125000) / 8000)
+
+#define OSDiffTick(tick1, tick0)		((OSTick)(tick1) - (OSTick)(tick0))
+// clang-format on
+OSTime OSGetTime(void);
+
+// [SPQE7T]/ISpyD.elf:.debug_info::0x119a90
+typedef struct ARCHandle
+{
+	void		*archiveStartAddr;	// size 0x04, offset 0x00
+	void		*FSTStart;			// size 0x04, offset 0x04
+	void		*fileStart;			// size 0x04, offset 0x08
+	u32			entryNum;			// size 0x04, offset 0x0c // more accurately entryCount
+	const char	*FSTStringStart;	// size 0x04, offset 0x10
+	u32			FSTLength;			// size 0x04, offset 0x14
+	u32			currDir;			// size 0x04, offset 0x18 // more accurately what ARCDir calls entryNum
+} ARCHandle; // size 0x1c
 
 // Matrix types
 
@@ -563,9 +628,6 @@ typedef struct MEMAllocator MEMAllocator;
 void *MEMAllocFromAllocator(MEMAllocator *allocator, u32 size);
 void MEMFreeToAllocator(MEMAllocator *allocator, void *block);
 
-// TODO
-struct KPADStatus;
-
 // [SGLEA4]/GormitiDebug.elf:.debug_info::0xba189
 typedef struct TPLHeader
 {
@@ -608,6 +670,312 @@ typedef struct TPLPalette
 	u32				numDescriptors;		// size 0x04, offset 0x04
 	TPLDescriptor	*descriptorArray;	// size 0x04, offset 0x08
 } TPLPalette; // size 0x0c
+
+typedef s32 WPADResult;
+enum WPADResult_et
+{
+	WPAD_ERR_OK						= 0,
+
+	WPAD_ERR_NO_CONTROLLER			= -1,	/* name known from asserts */
+	WPAD_ERR_COMMUNICATION_ERROR	= -2,	// [RT3P54] has this as WPAD_ERR_BUSY
+	WPAD_ERR_3						= -3,	// [RT3P54] has this as WPAD_ERR_TRANSFER
+	WPAD_ERR_INVALID				= -4,	/* name comes from [R89JEL] */
+//	WPAD_ERR_5						= -5,	/* unknown */
+//	WPAD_ERR_6						= -6,	/* unknown */
+	WPAD_ERR_CORRUPTED				= -7,	/* name comes from [R89JEL] */
+
+#define WPAD_ESUCCESS	WPAD_ERR_OK
+#define WPAD_ENODEV		WPAD_ERR_NO_CONTROLLER
+#define WPAD_ECOMM		WPAD_ERR_COMMUNICATION_ERROR
+// #define WPAD_E3
+#define WPAD_EINVAL		WPAD_ERR_INVALID
+#define WPAD_EBADE		WPAD_ERR_CORRUPTED
+
+#define WPAD_CESUCCESS	(WPAD_ESUCCESS + 0)
+#define WPAD_CENODEV	(WPAD_ENODEV + 0)
+#define WPAD_CECOMM		(WPAD_ECOMM + 0)
+#define WPAD_CERR_3		(WPAD_ERR_3 + 0)
+#define WPAD_CEINVAL	(WPAD_EINVAL + 0)
+#define WPAD_CEBADE		(WPAD_EBADE + 0)
+};
+
+typedef s32 WPADChannel;
+enum WPADChannel_et
+{
+	WPAD_CHAN0,
+	WPAD_CHAN1,
+	WPAD_CHAN2,
+	WPAD_CHAN3,				/* name known from asserts */
+
+	WPAD_MAX_CONTROLLERS,	/* name known from asserts */
+	WPAD_CHAN_INVALID		= -1
+};
+
+typedef s32 WPADDeviceType;
+enum WPADDeviceType_et
+{
+	WPAD_DEV_CORE				=  0,
+	WPAD_DEV_FS					=  1,
+	WPAD_DEV_CLASSIC			=  2,	/* name known from asserts, but not value */
+	WPAD_DEV_BALANCE_CHECKER	=  3,
+	WPAD_DEV_VSM				=  4,
+
+	WPAD_DEV_MOTION_PLUS		=  5,
+	WPAD_DEV_MPLS_PT_FS			=  6,
+	WPAD_DEV_MPLS_PT_CLASSIC	=  7,
+
+	WPAD_DEV_TRAIN				= 16,
+	WPAD_DEV_GUITAR				= 17,
+	WPAD_DEV_DRUM				= 18,
+	WPAD_DEV_TAIKO				= 19,
+	WPAD_DEV_TURNTABLE			= 20,
+
+	// seems to be like maybe general purpose non-specific device types
+	// maybe this was for testing or something? idk
+	WPAD_DEV_BULK_1				= 21,
+	WPAD_DEV_BULK_2				= 22,
+	WPAD_DEV_BULK_3				= 23,
+	WPAD_DEV_BULK_4				= 24,
+	WPAD_DEV_BULK_5				= 25,
+	WPAD_DEV_BULK_6				= 26,
+	WPAD_DEV_BULK_7				= 27,
+	WPAD_DEV_BULK_8				= 28,
+
+	WPAD_DEV_MPLS_PT_UNKNOWN	= 250,
+
+	WPAD_DEV_251				= 251,
+	WPAD_DEV_252				= 252,	// invalid device mode?
+	WPAD_DEV_NONE				= 253,	// sort of like WPAD_ENODEV (see __wpadAbortInitExtension in WPADHIDParser.c)
+//	WPAD_DEV_254				= 254,	/* unknown, doesn't seem to be used anywhere */
+	WPAD_DEV_INITIALIZING		= 255,	// see __a1_20_status_report
+};
+
+// names from wiiuse/wpad.h
+typedef u16 WPADButton;
+enum WPADButton_et
+{
+//  H..-AB12 ...+^v><
+	/* NOTE: the bytes from the report are swapped when being placed into this
+	 * format (see MAKE_BUTTON in WPADHIDParser.c)
+	 */
+	WPAD_BUTTON_LEFT	= (1 <<  0),
+	WPAD_BUTTON_RIGHT	= (1 <<  1),
+	WPAD_BUTTON_DOWN	= (1 <<  2),
+	WPAD_BUTTON_UP		= (1 <<  3),
+	WPAD_BUTTON_PLUS	= (1 <<  4),
+	//					  (1 <<  5),
+	//					  (1 <<  6),
+	//					  (1 <<  7),
+	WPAD_BUTTON_2		= (1 <<  8),
+	WPAD_BUTTON_1		= (1 <<  9),
+	WPAD_BUTTON_B		= (1 << 10),
+	WPAD_BUTTON_A		= (1 << 11),
+	WPAD_BUTTON_MINUS	= (1 << 12),
+	//					  (1 << 13),	// WPAD_BUTTON_FS_Z
+	//					  (1 << 14),	// WPAD_BUTTON_FS_C
+	WPAD_BUTTON_HOME	= (1 << 15),
+
+	WPAD_BUTTON_ALL		= 0x9f1f
+};
+
+// names from wiiuse/wpad.h
+typedef u16 WPADExtButton;
+enum WPADExtButton_et
+{
+	// Nunchuk (fight stick?)
+//  .CZ..... ........
+	/* NOTE: these bits are actually in the normal button variable, but are
+	 * enumerated here because they are buttons for an extension
+	 */
+	WPAD_BUTTON_FS_Z		= (1 << 13),
+	WPAD_BUTTON_FS_C		= (1 << 14),
+
+	WPAD_BUTTON_FS_ALL		= 0x6000,
+
+	// Classic Controller
+//  >vL-H+R. lBYAXr<^
+	WPAD_BUTTON_CL_UP		= (1 <<  0),
+	WPAD_BUTTON_CL_LEFT		= (1 <<  1),
+	WPAD_BUTTON_CL_ZR		= (1 <<  2),
+	WPAD_BUTTON_CL_X		= (1 <<  3),
+	WPAD_BUTTON_CL_A		= (1 <<  4),
+	WPAD_BUTTON_CL_Y		= (1 <<  5),
+	WPAD_BUTTON_CL_B		= (1 <<  6),
+	WPAD_BUTTON_CL_ZL		= (1 <<  7),
+	//						  (1 <<  8),
+	WPAD_BUTTON_CL_FULL_R	= (1 <<  9),
+	WPAD_BUTTON_CL_PLUS		= (1 << 10),
+	WPAD_BUTTON_CL_HOME		= (1 << 11),
+	WPAD_BUTTON_CL_MINUS	= (1 << 12),
+	WPAD_BUTTON_CL_FULL_L	= (1 << 13),
+	WPAD_BUTTON_CL_DOWN		= (1 << 14),
+	WPAD_BUTTON_CL_RIGHT	= (1 << 15),
+
+	WPAD_BUTTON_CL_ALL		= 0xfeff,
+
+	// Shinkansen train controller
+	// shares the same format as the Classic Controller
+	// (see WPADiExcludeButton)
+	WPAD_BUTTON_TR_UP		= WPAD_BUTTON_CL_UP,
+	WPAD_BUTTON_TR_LEFT		= WPAD_BUTTON_CL_LEFT,
+	WPAD_BUTTON_TR_ZR		= WPAD_BUTTON_CL_ZR,
+	WPAD_BUTTON_TR_X		= WPAD_BUTTON_CL_X,
+	WPAD_BUTTON_TR_A		= WPAD_BUTTON_CL_A,
+	WPAD_BUTTON_TR_Y		= WPAD_BUTTON_CL_Y,
+	WPAD_BUTTON_TR_B		= WPAD_BUTTON_CL_B,
+	WPAD_BUTTON_TR_ZL		= WPAD_BUTTON_CL_ZL,
+	//						= WPAD_BUTTON_CL_8,
+	WPAD_BUTTON_TR_FULL_R	= WPAD_BUTTON_CL_FULL_R,
+	WPAD_BUTTON_TR_PLUS		= WPAD_BUTTON_CL_PLUS,
+	WPAD_BUTTON_TR_HOME		= WPAD_BUTTON_CL_HOME,
+	WPAD_BUTTON_TR_MINUS	= WPAD_BUTTON_CL_MINUS,
+	WPAD_BUTTON_TR_FULL_L	= WPAD_BUTTON_CL_FULL_L,
+	WPAD_BUTTON_TR_DOWN		= WPAD_BUTTON_CL_DOWN,
+	WPAD_BUTTON_TR_RIGHT	= WPAD_BUTTON_CL_RIGHT,
+
+	WPAD_BUTTON_TR_ALL		= WPAD_BUTTON_CL_ALL,
+};
+
+// WPADControlMotor
+typedef u32 WPADMotorCommand;
+enum WPADMotorCommand_et
+{
+	WPAD_MOTOR_STOP		= 0,	/* name known from asserts */
+	WPAD_MOTOR_RUMBLE	= 1,	/* name known from asserts */
+};
+
+// WPADControlSpeaker
+typedef u32 WPADSpeakerCommand;
+enum WPADSpeakerCommand_et
+{
+	WPAD_SPEAKER_DISABLE	= 0,
+	WPAD_SPEAKER_ENABLE		= 1,	// might be ON? see HBMRemoteSpk.cpp
+	WPAD_SPEAKER_MUTE		= 2,
+	WPAD_SPEAKER_UNMUTE		= 3,
+	WPAD_SPEAKER_PLAY		= 4,	// figured out from HBM usage
+
+	// does the same thing as ENABLE? unless i'm missing something
+	// not used so i don't know the context
+	WPAD_SPEAKER_CMD_05		= 5,
+};
+
+typedef void WPADCallback(WPADChannel chan, WPADResult result);
+typedef void WPADConnectCallback(WPADChannel chan, WPADResult result);
+typedef void WPADExtensionCallback(WPADChannel chan, WPADDeviceType devType);
+
+// [SPQE7T]/ISpyD.elf:.debug_info::0xd675b
+typedef struct WPADInfo
+{
+	BOOL	dpd;		// size 0x04, offset 0x00
+	BOOL	speaker;	// size 0x04, offset 0x04
+	BOOL	attach;		// size 0x04, offset 0x08
+	BOOL	lowBat;		// size 0x04, offset 0x0c
+	BOOL	nearempty;	// size 0x04, offset 0x10
+	u8		battery;	// size 0x01, offset 0x14
+	u8		led;		// size 0x01, offset 0x15
+	u8		protocol;	// size 0x01, offset 0x16
+	u8		firmware;	// size 0x01, offset 0x17
+} WPADInfo; // size 0x18
+
+u8 WPADGetRadioSensitivity(WPADChannel chan);
+
+WPADResult WPADProbe(WPADChannel chan, WPADDeviceType *devTypeOut);
+WPADConnectCallback *WPADSetConnectCallback(WPADChannel chan,
+                                            WPADConnectCallback *cb);
+WPADExtensionCallback *WPADSetExtensionCallback(WPADChannel chan,
+                                                WPADExtensionCallback *cb);
+WPADResult WPADGetInfoAsync(WPADChannel chan, WPADInfo *info, WPADCallback *cb);
+void WPADControlMotor(WPADChannel chan, WPADMotorCommand command);
+BOOL WPADIsSpeakerEnabled(WPADChannel chan);
+WPADResult WPADControlSpeaker(WPADChannel chan, WPADSpeakerCommand command,
+                              WPADCallback *cb);
+BOOL WPADIsUsedCallbackByKPAD(void);
+void WPADSetCallbackByKPAD(BOOL isKPAD);
+
+// [SPQE7T]/ISpyD.elf:.debug_info::0x29f653
+typedef struct WENCInfo
+{
+	byte_t	data[32];
+} WENCInfo; // size 0x20
+
+// [SPQE7T]/ISpyD.elf:.debug_info::0xd66f9
+typedef struct KPADMPDir
+{
+	Vec	X;	// size 0x0c, offset 0x00
+	Vec	Y;	// size 0x0c, offset 0x0c
+	Vec	Z;	// size 0x0c, offset 0x18
+} KPADMPDir; // size 0x24
+
+// [SPQE7T]/ISpyD.elf:.debug_info::0xd66b8
+typedef struct KPADMPStatus
+{
+	Vec			mpls;	// size 0x0c, offset 0x00
+	Vec			angle;	// size 0x0c, offset 0x0c
+	KPADMPDir	dir;	// size 0x24, offset 0x18
+} KPADMPStatus; // size 0x3c
+
+// [SPQE7T]/ISpyD.elf:.debug_info::0xd650e
+typedef union KPADEXStatus
+{
+	// [SPQE7T]/ISpyD.elf:.debug_info::0xd6549
+	struct /* explicitly untagged */
+	{
+		Vec2	stick;		// size 0x08, offset 0x00
+		Vec		acc;		// size 0x0c, offset 0x08
+		f32		acc_value;	// size 0x04, offset 0x14
+		f32		acc_speed;	// size 0x04, offset 0x18
+	} fs; // size 0x1c
+
+	// [SPQE7T]/ISpyD.elf:.debug_info::0xd659d
+	struct /* explicitly untagged */
+	{
+		u32		hold;		// size 0x04, offset 0x00
+		u32		trig;		// size 0x04, offset 0x04
+		u32		release;	// size 0x04, offset 0x08
+		Vec2	lstick;		// size 0x08, offset 0x0c
+		Vec2	rstick;		// size 0x08, offset 0x14
+		f32		ltrigger;	// size 0x04, offset 0x1c
+		f32		rtrigger;	// size 0x04, offset 0x20
+	} cl; // size 0x24
+
+	// [SPQE7T]/ISpyD.elf:.debug_info::0xd6623
+	struct /* explicitly untagged */
+	{
+		f64	tgc_weight;		// size 0x08, offset 0x00
+		f64	weight[4];		// size 0x20, offset 0x08
+		f64	weight_ave[4];	// size 0x20, offset 0x28
+		s32	weight_err;		// size 0x04, offset 0x48
+		s32	tgc_weight_err;	// size 0x04, offset 0x4c
+	} bl; // size 0x50
+} KPADEXStatus;
+
+// [SPQE7T]/ISpyD.elf:.debug_info::0xd6300
+typedef struct KPADStatus
+{
+	u32				hold;			// size 0x04, offset 0x00
+	u32				trig;			// size 0x04, offset 0x04
+	u32				release;		// size 0x04, offset 0x08
+	Vec				acc;			// size 0x0c, offset 0x0c
+	f32				acc_value;		// size 0x04, offset 0x18
+	f32				acc_speed;		// size 0x04, offset 0x1c
+	Vec2			pos;			// size 0x08, offset 0x20
+	Vec2			vec;			// size 0x08, offset 0x28
+	f32				speed;			// size 0x04, offset 0x30
+	Vec2			horizon;		// size 0x08, offset 0x34
+	Vec2			hori_vec;		// size 0x08, offset 0x3c
+	f32				hori_speed;		// size 0x04, offset 0x44
+	f32				dist;			// size 0x04, offset 0x48
+	f32				dist_vec;		// size 0x04, offset 0x4c
+	f32				dist_speed;		// size 0x04, offset 0x50
+	Vec2			acc_vertical;	// size 0x08, offset 0x54
+	u8				dev_type;		// size 0x01, offset 0x5c
+	s8				wpad_err;		// size 0x01, offset 0x5d
+	s8				dpd_valid_fg;	// size 0x01, offset 0x5e
+	u8				data_format;	// size 0x01, offset 0x5f
+	KPADEXStatus	ex_status;		// size 0x50, offset 0x60
+	KPADMPStatus	mpls;			// size 0x3c, offset 0xb0
+	byte1_t			__paddings__[4]; // ??? is this the compiler?
+} KPADStatus; // size 0xf0
 
 #ifdef __cplusplus
 	}
