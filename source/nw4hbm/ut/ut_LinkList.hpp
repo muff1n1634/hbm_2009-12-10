@@ -31,9 +31,9 @@ namespace nw4hbm { namespace ut
 
 	// members
 	private:
-		/* base NonCopyable */	// offset 0x00, size 0x00
-		LinkListNode	*mNext;	// offset 0x00, size 0x04
-		LinkListNode	*mPrev;	// offset 0x04, size 0x04
+		/* base NonCopyable */	// size 0x00, offset 0x00
+		LinkListNode	*mNext;	// size 0x04, offset 0x00
+		LinkListNode	*mPrev;	// size 0x04, offset 0x04
 
 	// friends
 	private:
@@ -51,7 +51,7 @@ namespace nw4hbm { namespace ut
 		// [SGLEA4]/GormitiDebug.elf:.debug_info::0x475f8e
 		class LinkListImpl : private NonCopyable
 		{
-		// nested classes
+		// nested types
 		public:
 			// [SGLEA4]/GormitiDebug.elf:.debug_info::0x476169
 			class Iterator : public dummy::Iterator
@@ -79,8 +79,8 @@ namespace nw4hbm { namespace ut
 
 			// members
 			private:
-				/* base dummy::Iterator */	// offset 0x00, size 0x00
-				LinkListNode	*mPointer;	// offset 0x00, size 0x04
+				/* base dummy::Iterator */	// size 0x00, offset 0x00
+				LinkListNode	*mPointer;	// size 0x04, offset 0x00
 
 			// friends
 			private:
@@ -115,8 +115,8 @@ namespace nw4hbm { namespace ut
 
 		// members
 		private:
-			u32				mSize;	// offset 0x00, size 0x04
-			LinkListNode	mNode;	// offset 0x04, size 0x08
+			u32				mSize;	// size 0x04, offset 0x00
+			LinkListNode	mNode;	// size 0x08, offset 0x04
 		}; // size 0x0c
 	} // namespace detail
 
@@ -130,7 +130,7 @@ namespace nw4hbm { namespace ut
 	template <typename T, int I>
 	class LinkList : private detail::LinkListImpl
 	{
-	// nested classes
+	// nested types
 	public:
 		// [SGLEA4]/GormitiDebug.elf:.debug_info::0x47612f, 0x477fb4...
 		class Iterator : public dummy::Iterator<T, I>
@@ -180,8 +180,8 @@ namespace nw4hbm { namespace ut
 
 		// members
 		private:
-			/* base dummy::Iterator */				// offset 0x00, size 0x00
-			detail::LinkListImpl::Iterator	it_;	// offset 0x00, size 0x04
+			/* base dummy::Iterator */				// size 0x00, offset 0x00
+			detail::LinkListImpl::Iterator	it_;	// size 0x04, offset 0x00
 
 		// friends
 		private:
@@ -219,7 +219,7 @@ namespace nw4hbm { namespace ut
 
 	// members
 	private:
-		/* base LinkListImpl */	// offset 0x00, size 0x0c
+		/* base LinkListImpl */	// size 0x0c, offset 0x00
 	}; // size 0x0c
 }} // namespace nw4hbm::ut
 

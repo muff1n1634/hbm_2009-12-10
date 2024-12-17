@@ -5,6 +5,7 @@
  * headers
  */
 
+#include <macros.h> // ATTR_ALIGN
 #include <types.h> // u32
 
 #if 0
@@ -52,7 +53,7 @@ namespace nw4hbm { namespace ut
 		{
 			return *reinterpret_cast<const u32 *>(this);
 		}
-	}; // size 0x04
+	} ATTR_ALIGN(4); // size 0x04
 }} // namespace nw4hbm::ut
 
 #endif // RVL_SDK_HBM_NW4HBM_UT_COLOR_HPP

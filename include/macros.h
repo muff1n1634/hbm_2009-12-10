@@ -12,6 +12,19 @@
 # define decltype				__decltype__
 #endif
 
+// attributes
+
+#define ATTR_ALIGN(x)			__attribute__((aligned(x)))
+#define ATTR_NOINLINE			__attribute__((never_inline))
+#define ATTR_UNUSED				__attribute__((unused))
+#define ATTR_WEAK				__attribute__((weak))
+
+#ifdef __MWERKS__
+# define ATTR_ADDRESS(x)			: x
+#else
+# define ATTR_ADDRESS(x)
+#endif
+
 // helpers
 
 #define MIN(x, y)				((x) < (y) ? (x) : (y))

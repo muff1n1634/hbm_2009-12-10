@@ -19,7 +19,7 @@
  * classes and functions
  */
 
-namespace nw4hbm { namespace ut { class Rect; }}
+namespace nw4hbm { namespace ut { struct Rect; }}
 
 namespace nw4hbm { namespace lyt
 {
