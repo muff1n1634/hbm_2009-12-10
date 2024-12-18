@@ -9,8 +9,8 @@
 
 #if 0
 #include <revolution/OS/OSAlarm.h>
-#include <revolution/ARC/arc.h>
-#include <revolution/WENC/wenc.h>
+#include <revolution/ARC/arc.h> // ARCHandle
+#include <revolution/WENC/wenc.h> // WENCInfo
 #include <revolution/WPAD/WPAD.h>
 #endif
 
@@ -69,10 +69,10 @@ namespace homebutton
 	private:
 		static void UpdateSpeaker(OSAlarm *alarm, OSContext *context);
 
-		static void SpeakerOnCallback(WPADChannel chan, s32 result);
+		static void SpeakerOnCallback(WPADChannel chan, WPADResult result);
 		static void DelaySpeakerOnCallback(OSAlarm *alarm, OSContext *context);
 
-		static void SpeakerPlayCallback(WPADChannel chan, s32 result);
+		static void SpeakerPlayCallback(WPADChannel chan, WPADResult result);
 		static void DelaySpeakerPlayCallback(OSAlarm *alarm, OSContext *context);
 
 	// members

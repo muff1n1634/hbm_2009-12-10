@@ -96,6 +96,8 @@ struct OSAlarm
 
 void OSCreateAlarm(OSAlarm *alarm);
 void OSSetAlarm(OSAlarm *alarm, OSTime tick, OSAlarmHandler handler);
+void OSSetPeriodicAlarm(OSAlarm *alarm, OSTime tick, OSTime period,
+                        OSAlarmHandler handler);
 void OSCancelAlarm(OSAlarm *alarm);
 void OSSetAlarmUserData(OSAlarm *alarm, void *userData);
 void *OSGetAlarmUserData(const OSAlarm *alarm);
@@ -105,6 +107,9 @@ void *OSGetAlarmUserData(const OSAlarm *alarm);
 
 #define OSSetAlarmUserDataAny(alarm_, data_)	\
 	OSSetAlarmUserData(alarm_, (void *)(data_))
+
+BOOL OSDisableInterrupts(void);
+BOOL OSRestoreInterrupts(BOOL intrStatus);
 
 extern u32 OS_BUS_CLOCK ATTR_ADDRESS(0x800000f8);
 
@@ -136,6 +141,20 @@ typedef struct ARCHandle
 	u32			FSTLength;			// size 0x04, offset 0x14
 	u32			currDir;			// size 0x04, offset 0x18 // more accurately what ARCDir calls entryNum
 } ARCHandle; // size 0x1c
+
+// [SPQE7T]/ISpyD.elf:.debug_info::0x368e0b
+typedef struct ARCFileInfo
+{
+	ARCHandle	*handle;		// size 0x04, offset 0x00
+	u32			startOffset;	// size 0x04, offset 0x04
+	u32			length;			// size 0x04, offset 0x08
+} ARCFileInfo; // size 0x0c
+
+BOOL ARCInitHandle(void *bin, ARCHandle *handle);
+BOOL ARCFastOpen(ARCHandle *handle, int entrynum, ARCFileInfo *af);
+void *ARCGetStartAddrInMem(ARCFileInfo *af);
+u32 ARCGetLength(ARCFileInfo *af);
+BOOL ARCClose(ARCFileInfo *af);
 
 // Matrix types
 
@@ -889,6 +908,8 @@ void WPADControlMotor(WPADChannel chan, WPADMotorCommand command);
 BOOL WPADIsSpeakerEnabled(WPADChannel chan);
 WPADResult WPADControlSpeaker(WPADChannel chan, WPADSpeakerCommand command,
                               WPADCallback *cb);
+BOOL WPADCanSendStreamData(WPADChannel chan);
+WPADResult WPADSendStreamData(WPADChannel chan, void *p_buf, u16 len);
 BOOL WPADIsUsedCallbackByKPAD(void);
 void WPADSetCallbackByKPAD(BOOL isKPAD);
 
@@ -897,6 +918,9 @@ typedef struct WENCInfo
 {
 	byte_t	data[32];
 } WENCInfo; // size 0x20
+
+s32 WENCGetEncodeData(WENCInfo *info, u32 flag, const s16 *pbyPcmData,
+                       s32 nSampleNum, byte_t *pbyAdpcmData);
 
 // [SPQE7T]/ISpyD.elf:.debug_info::0xd66f9
 typedef struct KPADMPDir
