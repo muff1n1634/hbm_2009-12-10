@@ -108,8 +108,154 @@ void *OSGetAlarmUserData(const OSAlarm *alarm);
 #define OSSetAlarmUserDataAny(alarm_, data_)	\
 	OSSetAlarmUserData(alarm_, (void *)(data_))
 
+// [SPQE7T]/ISpyD.elf:.debug_info::0x3135
+struct OSContext
+{
+	register_t	gpr[32];			// size 0x080, offset 0x000
+	register_t	cr;					// size 0x004, offset 0x080
+	register_t	lr;					// size 0x004, offset 0x084
+	register_t	ctr;				// size 0x004, offset 0x088
+	register_t	xer;				// size 0x004, offset 0x08c
+	f64			fpr[32];			// size 0x100, offset 0x090
+	u32			fpscr_pad;			// size 0x004, offset 0x190
+	register_t	fpscr;				// size 0x004, offset 0x194
+	register_t	srr0;				// size 0x004, offset 0x198
+	register_t	srr1;				// size 0x004, offset 0x19c
+	u16			mode;				// size 0x002, offset 0x1a0
+	u16			state;				// size 0x002, offset 0x1a2
+	register_t	gqr[8];				// size 0x020, offset 0x1a4
+	u32			psf_pad;			// size 0x004, offset 0x1c4
+	f64			psf[32];			// size 0x100, offset 0x1c8
+}; // size 0x2c8
+
 BOOL OSDisableInterrupts(void);
 BOOL OSRestoreInterrupts(BOOL intrStatus);
+
+#define OSSendMessageAny(msgQueue_, msg_, flags_)	\
+	OSSendMessage(msgQueue_, (OSMessage)(msg_), flags_)
+
+#define OSReceiveMessageAny(msgQueue_, msgOut_, flags_)	\
+	OSReceiveMessage(msgQueue_, (OSMessage *)(msgOut_), flags_)
+
+#define OSJamMessageAny(msgQueue_, msg_, flags_)	\
+	OSJamMessage(msgQueue_, (OSMessage)(msg_), flags_)
+
+typedef void *OSMessage;
+
+typedef u32 OSMessageFlags;
+enum OSMessageFlags_et
+{
+	OS_MESSAGE_NO_FLAGS			= 0,
+
+	OS_MESSAGE_FLAG_PERSISTENT	= (1 << 0),
+};
+
+typedef struct OSMutex OSMutex;
+typedef struct OSThread OSThread;
+
+// [SPQE7T]/ISpyD.elf:.debug_info::0x333a
+typedef struct OSMutexLink
+{
+	OSMutex	*next;	// size 0x04, offset 0x00
+	OSMutex	*prev;	// size 0x04, offset 0x04
+} OSMutexLink; // size 0x08
+
+enum OSThreadState
+{
+	OS_THREAD_STATE_EXITED		= 0,
+	OS_THREAD_STATE_READY		= (1 << 0),
+	OS_THREAD_STATE_RUNNING		= (1 << 1),
+	OS_THREAD_STATE_SLEEPING	= (1 << 2),
+	OS_THREAD_STATE_MORIBUND	= (1 << 3),
+} typedef OSThreadState;
+
+typedef u16 OSThreadFlags;
+enum OSThreadFlags_et
+{
+	OS_THREAD_NO_FLAGS	= 0,
+
+	OS_THREAD_DETACHED	= (1 << 0),
+};
+
+typedef void OSSwitchThreadCallback(OSThread *curThread, OSThread *newThread);
+typedef void *OSThreadFunction(void *arg);
+
+// [SPQE7T]/ISpyD.elf:.debug_info::0x2fb2
+typedef struct OSThreadQueue
+{
+	OSThread	*head;	// size 0x04, offset 0x00
+	OSThread	*tail;	// size 0x04, offset 0x04
+} OSThreadQueue; // size 0x08
+
+// [SPQE7T]/ISpyD.elf:.debug_info::0x328b
+typedef struct OSThreadLink
+{
+	OSThread	*next;	// size 0x04, offset 0x00
+	OSThread	*prev;	// size 0x04, offset 0x04
+} OSThreadLink; // size 0x08
+
+// [SPQE7T]/ISpyD.elf:.debug_info::0x32cf
+typedef struct OSMutexQueue
+{
+	OSMutex	*head;	// size 0x04, offset 0x00
+	OSMutex	*tail;	// size 0x04, offset 0x04
+} OSMutexQueue; // size 0x08
+
+// [SPQE7T]/ISpyD.elf:.debug_info::0x2feb
+struct OSThread
+{
+	OSContext		context;		// size 0x2c8, offset 0x000
+	u16				state;			// size 0x002, offset 0x2c8
+	u16				attr;			// size 0x002, offset 0x2ca
+	s32				suspend;		// size 0x004, offset 0x2cc
+	s32				priority;		// size 0x004, offset 0x2d0
+	s32				base;			// size 0x004, offset 0x2d4
+	void			*val;			// size 0x004, offset 0x2d8
+	OSThreadQueue	*queue;			// size 0x004, offset 0x2dc
+	OSThreadLink	link;			// size 0x008, offset 0x2e0
+	OSThreadQueue	queueJoin;		// size 0x008, offset 0x2e8
+	OSMutex			*mutex;			// size 0x004, offset 0x2f0
+	OSMutexQueue	queueMutex;		// size 0x008, offset 0x2f4
+	OSThreadLink	linkActive;		// size 0x008, offset 0x2fc
+	u8				*stackBase;		// size 0x004, offset 0x304
+	u32				*stackEnd;		// size 0x004, offset 0x308
+	s32				error;			// size 0x004, offset 0x30c
+	void			*specific[2];	// size 0x008, offset 0x310
+}; // size 0x318
+
+BOOL OSCreateThread(OSThread *thread, OSThreadFunction *func, void *funcArg,
+                   void *stackBegin, u32 stackSize, int prio,
+                   OSThreadFlags flags);
+BOOL OSJoinThread(OSThread *thread, void *val);
+s32 OSResumeThread(OSThread *thread);
+
+// [SPQE7T]/ISpyD.elf:.debug_info::0x23508c
+typedef struct OSMessageQueue
+{
+	OSThreadQueue	queueSend;		// size 0x08, offset 0x00
+	OSThreadQueue	queueReceive;	// size 0x08, offset 0x08
+	OSMessage		*msgArray;		// size 0x04, offset 0x10
+	s32				msgCount;		// size 0x04, offset 0x14
+	s32				firstIndex;		// size 0x04, offset 0x18
+	s32				usedCount;		// size 0x04, offset 0x1c
+} OSMessageQueue; // size 0x20
+
+// [SPQE7T]/ISpyD.elf:.debug_info::0x2f63
+struct OSMutex
+{
+	OSThreadQueue	queue;		// size 0x08, offset 0x00
+	OSThread		*thread;	// size 0x04, offset 0x08
+	s32				count;		// size 0x04, offset 0x0c
+	OSMutexLink		link;		// size 0x08, offset 0x10
+}; // size 0x18
+
+void OSInitMessageQueue(OSMessageQueue *msgQueue, OSMessage *buffer,
+                        int capacity);
+int OSSendMessage(OSMessageQueue *msgQueue, OSMessage msg,
+                  OSMessageFlags flags);
+int OSReceiveMessage(OSMessageQueue *msgQueue, OSMessage *msgOut,
+                     OSMessageFlags flags);
+int OSJamMessage(OSMessageQueue *msgQueue, OSMessage msg, OSMessageFlags flags);
 
 extern u32 OS_BUS_CLOCK ATTR_ADDRESS(0x800000f8);
 
@@ -129,6 +275,9 @@ extern u32 OS_BUS_CLOCK ATTR_ADDRESS(0x800000f8);
 #define OSDiffTick(tick1, tick0)		((OSTick)(tick1) - (OSTick)(tick0))
 // clang-format on
 OSTime OSGetTime(void);
+
+BOOL AICheckInit(void);
+void AIInit(void *stack);
 
 // [SPQE7T]/ISpyD.elf:.debug_info::0x119a90
 typedef struct ARCHandle
@@ -151,10 +300,20 @@ typedef struct ARCFileInfo
 } ARCFileInfo; // size 0x0c
 
 BOOL ARCInitHandle(void *bin, ARCHandle *handle);
+BOOL ARCOpen(ARCHandle *handle, const char *filename, ARCFileInfo *af);
 BOOL ARCFastOpen(ARCHandle *handle, int entrynum, ARCFileInfo *af);
 void *ARCGetStartAddrInMem(ARCFileInfo *af);
 u32 ARCGetLength(ARCFileInfo *af);
 BOOL ARCClose(ARCFileInfo *af);
+
+// [SPQE7T]/ISpyD.elf:.debug_info::0x36a6f8
+typedef void AXFrameCallback(void);
+
+// TODO
+typedef struct _AXVPB AXVPB;
+
+void AXInit(void);
+AXFrameCallback *AXRegisterCallback(AXFrameCallback *cb);
 
 // Matrix types
 
@@ -617,7 +776,7 @@ static inline void GXEnd(void)
 		                 "GXEnd: called without a GXBegin");
 	}
 
-	__GXinBegin = false;
+	__GXinBegin = FALSE;
 #endif // !defined(NDEBUG)
 }
 
