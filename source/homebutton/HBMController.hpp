@@ -7,6 +7,7 @@
 
 #include <types.h>
 
+#include "HBMCommon.hpp"
 #include "HBMRemoteSpk.hpp"
 
 #if 0
@@ -21,20 +22,6 @@
 /*******************************************************************************
  * types
  */
-
-// [SGLEA4]/GormitiDebug.elf:.debug_info::0x30790d
-struct HBMKPadData
-{
-	KPADStatus	*kpad;			// size 0x04, offset 0x00
-	Vec2		pos;			// size 0x08, offset 0x04
-	u32			use_devtype;	// size 0x04, offset 0x0c
-}; // size 0x10
-
-// [SGLEA4]/GormitiDebug.elf:.debug_info::0x3078d4
-struct HBMControllerData
-{
-	HBMKPadData	wiiCon[WPAD_MAX_CONTROLLERS];	// size 0x40, offset 0x00
-}; // size 0x40
 
 // [SGLEA4]/GormitiDebug.elf:.debug_info::0x47b892
 struct HBController

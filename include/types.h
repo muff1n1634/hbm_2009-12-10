@@ -34,6 +34,16 @@ typedef int				BOOL;
 #define TRUE			1
 #define FALSE			0
 
+// Character types
+
+#if !defined(__cplusplus) || __cplusplus < 201103L
+typedef unsigned char	char8_t;
+typedef uint_least16_t	char16_t;
+typedef uint_least32_t	char32_t;
+#else
+// they are keywords
+#endif
+
 // Other types
 
 typedef unsigned long int	byte4_t;

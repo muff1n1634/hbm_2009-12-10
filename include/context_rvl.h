@@ -45,6 +45,8 @@ ATTR_WEAK void OSPanic(const char *file, int line, const char *msg, ...);
 typedef s64 OSTime;
 typedef u32 OSTick;
 
+void OSRegisterVersion(const char *version);
+
 static inline f32 __OSu16tof32(const u16 *arg)
 {
 	f32 ret;
@@ -309,11 +311,85 @@ BOOL ARCClose(ARCFileInfo *af);
 // [SPQE7T]/ISpyD.elf:.debug_info::0x36a6f8
 typedef void AXFrameCallback(void);
 
+// [SPQE7T]/ISpyD.elf:.debug_info::0x36c40e
+typedef void AXAuxCallback(void *data, void *context);
+
 // TODO
 typedef struct _AXVPB AXVPB;
 
 void AXInit(void);
 AXFrameCallback *AXRegisterCallback(AXFrameCallback *cb);
+
+// [SPQE7T]/ISpyD.elf:.debug_info::0x36bdec
+typedef void *AXFXAllocFunc(size_t /* explicitly unnamed */);
+
+// [SPQE7T]/ISpyD.elf:.debug_info::0x36be0f
+typedef void AXFXFreeFunc(void */* explicitly unnamed */);
+
+// [SPQE7T]/ISpyD.elf:.debug_info::0x36c3ae
+typedef struct AXFX_BUS
+{
+	s32	*left;		// size 0x04, offset 0x00
+	s32	*right;		// size 0x04, offset 0x04
+	s32	*surround;	// size 0x04, offset 0x08
+} AXFX_BUS; // size 0x0c
+
+// [SPQE7T]/ISpyD.elf:.debug_info::0x36bec8
+typedef struct AXFX_REVERBHI_EXP
+{
+	f32			*earlyLine[3];				// size 0x00c, offset 0x000
+	u32			earlyPos[3];				// size 0x00c, offset 0x00c
+	u32			earlyLength;				// size 0x004, offset 0x018
+	u32			earlyMaxLength;				// size 0x004, offset 0x01c
+	f32			earlyCoef[3];				// size 0x00c, offset 0x020
+	f32			*preDelayLine[3];			// size 0x00c, offset 0x02c
+	u32			preDelayPos;				// size 0x004, offset 0x038
+	u32			preDelayLength;				// size 0x004, offset 0x03c
+	u32			preDelayMaxLength;			// size 0x004, offset 0x040
+	f32			*combLine[3][3];			// size 0x024, offset 0x044
+	u32			combPos[3];					// size 0x00c, offset 0x068
+	u32			combLength[3];				// size 0x00c, offset 0x074
+	u32			combMaxLength[3];			// size 0x00c, offset 0x080
+	f32			combCoef[3];				// size 0x00c, offset 0x08c
+	f32			*allpassLine[3][2];			// size 0x018, offset 0x098
+	u32			allpassPos[2];				// size 0x008, offset 0x0b0
+	u32			allpassLength[2];			// size 0x008, offset 0x0b8
+	u32			allpassMaxLength[2];		// size 0x008, offset 0x0c0
+	f32			*lastAllpassLine[3];		// size 0x00c, offset 0x0c8
+	u32			lastAllpassPos[3];			// size 0x00c, offset 0x0d4
+	u32			lastAllpassLength[3];		// size 0x00c, offset 0x0e0
+	u32			lastAllpassMaxLength[3];	// size 0x00c, offset 0x0ec
+	f32			allpassCoef;				// size 0x004, offset 0x0f8
+	f32			lastLpfOut[3];				// size 0x00c, offset 0x0fc
+	f32			lpfCoef;					// size 0x004, offset 0x108
+	u32			active;						// size 0x004, offset 0x10c
+	u32			earlyMode;					// size 0x004, offset 0x110
+	f32			preDelayTimeMax;			// size 0x004, offset 0x114
+	f32			preDelayTime;				// size 0x004, offset 0x118
+	u32			fusedMode;					// size 0x004, offset 0x11c
+	f32			fusedTime;					// size 0x004, offset 0x120
+	f32			coloration;					// size 0x004, offset 0x124
+	f32			damping;					// size 0x004, offset 0x128
+	f32			crosstalk;					// size 0x004, offset 0x12c
+	f32			earlyGain;					// size 0x004, offset 0x130
+	f32			fusedGain;					// size 0x004, offset 0x134
+	AXFX_BUS	*busIn;						// size 0x004, offset 0x138
+	AXFX_BUS	*busOut;					// size 0x004, offset 0x13c
+	f32			outGain;					// size 0x004, offset 0x140
+	f32			sendGain;					// size 0x004, offset 0x144
+} AXFX_REVERBHI_EXP; // size 0x148
+
+// [SPQE7T]/ISpyD.elf:.debug_info::0x36be2c
+typedef struct AXFX_REVERBHI
+{
+	AXFX_REVERBHI_EXP	reverbInner;	// size 0x148, offset 0x000
+	f32					coloration;		// size 0x004, offset 0x148
+	f32					mix;			// size 0x004, offset 0x14c
+	f32					time;			// size 0x004, offset 0x150
+	f32					damping;		// size 0x004, offset 0x154
+	f32					preDelay;		// size 0x004, offset 0x158
+	f32					crosstalk;		// size 0x004, offset 0x15c
+} AXFX_REVERBHI; // size 0x160
 
 // Matrix types
 
@@ -673,6 +749,44 @@ typedef enum _GXTexFilter
 	GX_LIN_MIP_LIN,
 } GXTexFilter;
 
+// [SPQE7T]/ISpyD.elf:.debug_info::0x28a5e5
+enum _GXTexFmt
+{
+	GX_TF_I4		=  0,
+	GX_TF_I8		=  1,
+	GX_TF_IA4		=  2,
+	GX_TF_IA8		=  3,
+
+	GX_TF_RGB565	=  4,
+	GX_TF_RGB5A3	=  5,
+	GX_TF_RGBA8		=  6,
+
+	GX_TF_CMPR		= 14,
+
+	GX_CTF_R4		= 32,
+	GX_CTF_RA4		= 34,
+	GX_CTF_RA8		= 35,
+	GX_CTF_YUVA8	= 38,
+
+	GX_CTF_A8		= 39,
+	GX_CTF_R8		= 40,
+	GX_CTF_G8		= 41,
+	GX_CTF_B8		= 42,
+	GX_CTF_RG8		= 43,
+	GX_CTF_GB8		= 44,
+
+	GX_TF_Z8		= 17,
+	GX_TF_Z16		= 19,
+	GX_TF_Z24X8		= 22,
+
+	GX_CTF_Z4		= 48,
+	GX_CTF_Z8M		= 57,
+	GX_CTF_Z8L		= 58,
+	GX_CTF_Z16L		= 60,
+
+	GX_TF_A8		= GX_CTF_A8
+} typedef GXTexFmt;
+
 // [SGLEA4]/GormitiDebug.elf:.debug_info::0x2b93e8
 typedef enum _GXTexMapID
 {
@@ -800,11 +914,42 @@ inline void GXColor1u32(u32 color)
 	__WGPipe.u32 = color;
 }
 
-// TODO
+typedef struct MEMiHeapHead MEMiHeapHead;
 typedef struct MEMAllocator MEMAllocator;
+
+// [SPQE7T]/ISpyD.elf:.debug_info::0x113386
+typedef void *MEMAllocatorAllocFunc(MEMAllocator *pAllocator, u32 size);
+
+// [SPQE7T]/ISpyD.elf:.debug_info::0x1133bb
+typedef void MEMAllocatorFreeFunc(MEMAllocator *pAllocator, void *memBlock);
+
+// [SPQE7T]/ISpyD.elf:.debug_info::0x113345
+typedef struct MEMAllocatorFunc
+{
+	MEMAllocatorAllocFunc	*pfAlloc;	// size 0x04, offset 0x00
+	MEMAllocatorFreeFunc	*pfFree;	// size 0x04, offset 0x04
+} MEMAllocatorFunc; // size 0x08
+
+// [SPQE7T]/ISpyD.elf:.debug_info::0x1132e1
+struct MEMAllocator
+{
+	const MEMAllocatorFunc	*pFunc;		// size 0x04, offset 0x00
+	MEMiHeapHead			*pHeap;		// size 0x04, offset 0x04
+	u32						heapParam1;	// size 0x04, offset 0x08
+	u32						heapParam2;	// size 0x04, offset 0x0c
+}; // size 0x10
 
 void *MEMAllocFromAllocator(MEMAllocator *allocator, u32 size);
 void MEMFreeToAllocator(MEMAllocator *allocator, void *block);
+void MEMInitAllocatorForExpHeap(MEMAllocator *allocator, MEMiHeapHead *heap,
+                                s32 align);
+
+MEMiHeapHead *MEMCreateExpHeapEx(void *start, u32 size, u16 opt);
+MEMiHeapHead *MEMDestroyExpHeap(MEMiHeapHead *heap);
+static inline MEMiHeapHead *MEMCreateExpHeap(void *start, u32 size)
+{
+	return MEMCreateExpHeapEx(start, size, 0);
+}
 
 // [SGLEA4]/GormitiDebug.elf:.debug_info::0xba189
 typedef struct TPLHeader
@@ -1040,6 +1185,9 @@ enum WPADSpeakerCommand_et
 typedef void WPADCallback(WPADChannel chan, WPADResult result);
 typedef void WPADConnectCallback(WPADChannel chan, WPADResult result);
 typedef void WPADExtensionCallback(WPADChannel chan, WPADDeviceType devType);
+
+typedef void WUDSyncDeviceCallback(s32 result, s32 num);
+typedef WUDSyncDeviceCallback WPADSimpleSyncCallback;
 
 // [SPQE7T]/ISpyD.elf:.debug_info::0xd675b
 typedef struct WPADInfo
