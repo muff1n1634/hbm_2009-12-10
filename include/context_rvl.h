@@ -526,31 +526,50 @@ typedef Vec *VecPtr;
 typedef const Vec2 *CVec2Ptr;
 typedef const Vec *CVecPtr;
 
-#if defined(NDEBUG)
-# define MTXIdentity	PSMTXIdentity
-# define MTXInverse		PSMTXInverse
-# define MTXTrans		PSMTXTrans
-
-# define MTXMultVec		PSMTXMultVec
-#else
+#if !defined(NDEBUG)
 # define MTXIdentity	C_MTXIdentity
+# define MTXConcat		C_MTXConcat
 # define MTXInverse		C_MTXInverse
+# define MTXRotRad		C_MTXRotRad
 # define MTXTrans		C_MTXTrans
+# define MTXTransApply	C_MTXTransApply
+# define MTXScale		C_MTXScale
 
 # define MTXMultVec		C_MTXMultVec
+#else
+# define MTXIdentity	PSMTXIdentity
+# define MTXConcat		PSMTXConcat
+# define MTXInverse		PSMTXInverse
+# define MTXRotRad		PSMTXRotRad
+# define MTXTrans		PSMTXTrans
+# define MTXTransApply	PSMTXTransApply
+# define MTXScale		PSMTXScale
+
+# define MTXMultVec		PSMTXMultVec
 #endif
 
 void PSMTXIdentity(Mtx m);
 void C_MTXIdentity(Mtx m);
 
 void PSMTXCopy(CMtxPtr src, MtxPtr dst);
+
 void PSMTXConcat(CMtxPtr a, CMtxPtr b, MtxPtr ab);
+void C_MTXConcat(CMtxPtr a, CMtxPtr b, MtxPtr ab);
 
 void PSMTXInverse(CMtxPtr src, MtxPtr inv);
 void C_MTXInverse(CMtxPtr src, MtxPtr inv);
 
+void PSMTXRotRad(Mtx m, char axis, f32);
+void C_MTXRotRad(Mtx m, char axis, f32);
+
 void PSMTXTrans(Mtx m, f32, f32, f32);
 void C_MTXTrans(Mtx m, f32, f32, f32);
+
+void PSMTXTransApply(CMtxPtr src, MtxPtr dst, f32, f32, f32);
+void C_MTXTransApply(CMtxPtr src, MtxPtr dst, f32, f32, f32);
+
+void PSMTXScale(MtxPtr m, f32, f32, f32);
+void C_MTXScale(MtxPtr m, f32, f32, f32);
 
 void PSMTXMultVec(CMtxPtr m, CVecPtr src, VecPtr dst);
 void C_MTXMultVec(CMtxPtr m, CVecPtr src, VecPtr dst);

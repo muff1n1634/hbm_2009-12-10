@@ -12,14 +12,16 @@
 #include "lyt_types.hpp"
 
 #include "../math/math_types.hpp"
+#include "../ut/ut_Color.hpp"
 #include "../ut/ut_LinkList.hpp"
-#include "../ut/ut_RuntimeTypeInfo.hpp"
 
 /*******************************************************************************
  * classes and functions
  */
 
+// forward declarations
 namespace nw4hbm { namespace ut { struct Rect; }}
+namespace nw4hbm { namespace ut { namespace detail { class RuntimeTypeInfo; }}}
 
 namespace nw4hbm { namespace lyt
 {
@@ -43,7 +45,7 @@ namespace nw4hbm { namespace lyt
 			Pane				*mTarget;	// size 0x04, offset 0x08
 		}; // size 0x0c
 
-		// [SGLEA4]/GormitiDebug.elf:.debug_info::0x
+		// [SGLEA4]/GormitiDebug.elf:.debug_info::0x4763c3
 		class PaneBase
 		{
 		// methods
@@ -97,7 +99,6 @@ namespace nw4hbm { namespace lyt
 		{
 			return &typeInfo;
 		}
-
 		virtual void CalculateMtx(const DrawInfo &drawInfo);
 		virtual void Draw(const DrawInfo &drawInfo);
 		virtual void DrawSelf(const DrawInfo &drawInfo);

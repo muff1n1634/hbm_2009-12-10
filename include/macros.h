@@ -39,6 +39,16 @@
 #define BOOLIFY_TERNARY_TYPE(type_, exp_)	((exp_) ? (type_)1 : (type_)0)
 #define BOOLIFY_TERNARY(exp_)				BOOLIFY_TERNARY_TYPE(int, exp_)
 
+// math
+
+#define CONST_FLOAT_PI				3.1415926f
+
+#define DEG_TO_RAD_MULT_CONSTANT	(CONST_FLOAT_PI / 180.0f)
+#define RAD_TO_DEG_MULT_CONSTANT	(180.0f / CONST_FLOAT_PI)
+
+#define DEG_TO_RAD(x)			((x) * DEG_TO_RAD_MULT_CONSTANT)
+#define RAD_TO_DEG(x)			((x) * RAD_TO_DEG_MULT_CONSTANT)
+
 // Range-for loop macros
 
 #if defined(__cplusplus)
