@@ -31,6 +31,7 @@ namespace nw4hbm { namespace lyt
 	class DrawInfo;
 	class GroupContainer;
 	class Pane;
+	class ResourceAccessor;
 
 	namespace res
 	{
@@ -62,18 +63,17 @@ namespace nw4hbm { namespace lyt
 		virtual void UnbindAnimation(AnimTransform *pAnimTrans);
 		virtual void UnbindAllAnimation();
 		virtual void SetAnimationEnable(AnimTransform *pAnimTrans,
-	                                    bool bEnable);
+		                                bool bEnable);
 		virtual void CalculateMtx(const DrawInfo &drawInfo);
 		virtual void Draw(const DrawInfo &drawInfo);
 		virtual void Animate(u32 option);
 		virtual void SetTagProcessor(
 			ut::TagProcessorBase<wchar_t> *pTagProcessor);
 
-		// gethods
+		// methods
 		Pane *GetRootPane() const { return mpRootPane; }
 		GroupContainer *GetGroupContainer() const { return mpGroupContainer; }
 
-		// get methods
 		ut::Rect GetLayoutRect() const;
 
 		// static methods
