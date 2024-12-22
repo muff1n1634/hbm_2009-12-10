@@ -568,6 +568,16 @@ typedef enum _GXAlphaOp
 	GX_MAX_ALPHAOP
 } GXAlphaOp;
 
+// [SPQE7T]/ISpyD.elf:.debug_info::0x21232f
+typedef enum _GXAnisotropy
+{
+	GX_ANISO_1,
+	GX_ANISO_2,
+	GX_ANISO_4,
+
+	GX_MAX_ANISOTROPY
+} GXAnisotropy;
+
 // TODO: get a specific source (name, game id)
 // TODO: check library version of game that has this
 // dwarfv1_megadump.txt:1220088-1220092
@@ -1339,11 +1349,18 @@ void GXSetAlphaCompare(GXCompare, u8, GXAlphaOp, GXCompare, u8);
 void GXSetAlphaUpdate(GXBool);
 void GXSetBlendMode(GXBlendMode, GXBlendFactor, GXBlendFactor, GXLogicOp);
 void GXSetChanCtrl(GXChannelID, GXBool, GXColorSrc, GXColorSrc, GXLightID, GXDiffuseFn, GXAttnFn);
+void GXSetChanMatColor(GXChannelID, GXColor);
 void GXSetCullMode(GXCullMode);
 void GXSetCurrentMtx(int);
 void GXSetDispCopyGamma(int);
 void GXSetFog(int, f32, f32, f32, f32, GXColor);
 void GXInitTexObj(GXTexObj *, void *, u16, u16, GXTexFmt, GXTexWrapMode, GXTexWrapMode, GXBool);
+void GXInitTexObjCI(GXTexObj *, void *, u16, u16, GXTexFmt, GXTexWrapMode,
+                    GXTexWrapMode, GXBool, u32);
+void GXInitTexObjLOD(GXTexObj *, GXTexFilter, GXTexFilter,
+                     f32, f32, f32, GXBool,
+                     GXBool, GXAnisotropy);
+void GXInitTexObjUserData(GXTexObj *, void *);
 void GXSetLineWidth(u8, int);
 void GXSetNumChans(u8);
 void GXSetNumIndStages(u8);
@@ -1354,6 +1371,7 @@ void GXSetTevAlphaOp(GXTevStageID, GXTevOp, GXTevBias, GXTevScale, u8, GXTevRegI
 void GXSetTevColor(GXTevRegID, GXColor);
 void GXSetTevColorIn(GXTevStageID, GXTevColorArg, GXTevColorArg, GXTevColorArg, GXTevColorArg);
 void GXSetTevColorOp(GXTevStageID, GXTevOp, GXTevBias, GXTevScale, u8, GXTevRegID);
+void GXSetTevDirect(GXTevStageID);
 void GXSetTevOp(GXTevStageID, GXTevMode);
 void GXSetTevOrder(GXTevStageID, GXTexCoordID, GXTexMapID, GXChannelID);
 void GXSetTevSwapMode(GXTevStageID, GXTevSwapSel, GXTevSwapSel);
@@ -1407,6 +1425,12 @@ inline void GXPosition3f32(f32 x, f32 y, f32 z)
 inline void GXColor1u32(u32 color)
 {
 	__WGPipe.u32 = color;
+}
+
+inline void GXTexCoord2f32(f32 u, f32 v)
+{
+	__WGPipe.f32 = u;
+	__WGPipe.f32 = v;
 }
 
 typedef struct MEMiHeapHead MEMiHeapHead;
@@ -1509,6 +1533,9 @@ typedef struct TPLPalette
 	u32				numDescriptors;		// size 0x04, offset 0x04
 	TPLDescriptor	*descriptorArray;	// size 0x04, offset 0x08
 } TPLPalette; // size 0x0c
+
+void TPLBind(TPLPalette *pal);
+TPLDescriptor *TPLGet(TPLPalette *pal, u32 id);
 
 void VISetBlack(BOOL black);
 void VIFlush(void);

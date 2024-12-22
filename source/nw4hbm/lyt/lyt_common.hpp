@@ -7,9 +7,8 @@
 
 #include <types.h>
 
-#include "../ut/ut_Color.hpp"
-
 #include "../math/math_types.hpp" // math::VEC2
+#include "../ut/ut_Color.hpp"
 
 #if 0
 #include <revolution/GX/GXTypes.h>
@@ -52,7 +51,7 @@ namespace nw4hbm { namespace lyt
 		struct BinaryFileHeader
 		{
 			char	signature[4];	// size 0x04, offset 0x00
-			u16		byteOrder;		// size 0x02, offset 0x04
+			byte2_t	byteOrder;		// size 0x02, offset 0x04
 			u16		version;		// size 0x02, offset 0x06
 			u32		fileSize;		// size 0x04, offset 0x08
 			u16		headerSize;		// size 0x02, offset 0x0c
@@ -106,7 +105,7 @@ namespace nw4hbm { namespace lyt
 	// methods
 	public:
 		// cdtors
-		Size(): width(0.0f), height(0.0f) {}
+		Size(): width(), height() {}
 		Size(f32 aWidth, f32 aHeight): width(aWidth), height(aHeight) {}
 		Size(const Size &other): width(other.width), height(other.height) {}
 
@@ -118,8 +117,8 @@ namespace nw4hbm { namespace lyt
 
 	// members
 	public:
-		f32 width;	// size 0x04, offset 0x00
-		f32 height;	// size 0x04, offset 0x04
+		f32	width;	// size 0x04, offset 0x00
+		f32	height;	// size 0x04, offset 0x04
 	}; // size 0x08
 
 	namespace detail
@@ -133,18 +132,14 @@ namespace nw4hbm { namespace lyt
 			// cdtors
 			TexCoordAry();
 
-			// gethods
+			// methods
 			u8 GetSize() const { return mNum; }
 			const TexCoords *GetArray() const { return mpData; }
 
-			// sethods
 			void SetSize(u8 num);
 
-			// get methods
-			bool IsEmpty() const
-				{ return mCap == 0; }
+			bool IsEmpty() const { return mCap == 0; }
 
-			// methods
 			void Reserve(u8 num);
 			void Free();
 			void Copy(const void *pResTexCoord, u8 texCoordNum);
@@ -155,16 +150,15 @@ namespace nw4hbm { namespace lyt
 			u8			mNum;		// size 0x01, offset 0x01
 			/* 2 bytes padding */
 			TexCoords	*mpData;	// size 0x04, offset 0x04
-			// static members
 		}; // size 0x08
 
 		bool EqualsPaneName(const char *name1, const char *name2);
 		bool EqualsMaterialName(const char *name1, const char *name2);
 		bool TestFileHeader(const res::BinaryFileHeader &fileHeader);
 		bool TestFileHeader(const res::BinaryFileHeader &fileHeader,
-		                    u32 testSig);
+		                    byte4_t testSig);
 
-		// TexCoordAry happened here
+		// TexCoordAry happens here
 
 		bool IsModulateVertexColor(ut::Color *vtxColors, u8 glbAlpha);
 		ut::Color MultipleAlpha(const ut::Color col, u8 alpha);
@@ -182,8 +176,10 @@ namespace nw4hbm { namespace lyt
 
 		// Inlines
 
-		inline s32 GetSignatureInt(const char *sig)
-			{ return *reinterpret_cast<const s32 *>(sig); }
+		inline long GetSignatureInt(const char *sig)
+		{
+			return *reinterpret_cast<const long *>(sig);
+		}
 
 		inline const char *GetStrTableStr(const void *pStrTable, int index)
 		{
@@ -195,23 +191,35 @@ namespace nw4hbm { namespace lyt
 
 		// But why
 		inline u8 GetVtxColorElement(const ut::Color *cols, u32 idx)
-			{ return reinterpret_cast<const u8 *>(cols + idx / 4)[idx % 4]; }
+		{
+			return reinterpret_cast<const u8 *>(cols + idx / 4)[idx % 4];
+		}
 
 		inline void SetVtxColorElement(ut::Color *cols, u32 idx, u8 value)
-			{ reinterpret_cast<u8 *>(cols + idx / 4)[idx % 4] = value; }
+		{
+			reinterpret_cast<u8 *>(cols + idx / 4)[idx % 4] = value;
+		}
 
 		// positions of what?
 		inline u8 GetHorizontalPosition(u8 var)
-			{ return static_cast<u8>(var % 3); }
+		{
+			return var % 3;
+		}
 
 		inline u8 GetVerticalPosition(u8 var)
-			{ return static_cast<u8>(var / 3); }
+		{
+			return var / 3;
+		}
 
 		inline void SetHorizontalPosition(u8 *pVar, u8 newVal)
-			{ *pVar = static_cast<u8>(GetVerticalPosition(*pVar) * 3 + newVal); }
+		{
+			*pVar = GetVerticalPosition(*pVar) * 3 + newVal;
+		}
 
 		inline void SetVerticalPosition(u8 *pVar, u8 newVal)
-			{ *pVar = static_cast<u8>(newVal * 3 + GetHorizontalPosition(*pVar)); }
+		{
+			*pVar = newVal * 3 + GetHorizontalPosition(*pVar);
+		}
 	} // namespace detail
 }} // namespace nw4hbm::lyt
 

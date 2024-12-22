@@ -36,7 +36,8 @@
 
 #define ARRAY_LENGTH(x)			(sizeof (x) / sizeof ((x)[0]))
 
-#define BOOLIFY_TERNARY(x)		((x) ? 1 : 0)
+#define BOOLIFY_TERNARY_TYPE(type_, exp_)	((exp_) ? (type_)1 : (type_)0)
+#define BOOLIFY_TERNARY(exp_)				BOOLIFY_TERNARY_TYPE(int, exp_)
 
 // Range-for loop macros
 
