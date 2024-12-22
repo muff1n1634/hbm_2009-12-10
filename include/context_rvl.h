@@ -47,6 +47,60 @@ typedef u32 OSTick;
 
 void OSRegisterVersion(const char *version);
 
+static inline u8 __OSf32tou8(register f32 arg)
+{
+	f32 a;
+	register f32 *ptr = &a;
+
+	u8 r;
+
+#ifdef __clang__
+	__asm__ ("psq_st %0, 0(%1), 1, 2" :: "f"(arg), "r"(ptr));
+#else
+	asm { psq_st arg, 0(ptr), TRUE, 2 };
+#endif // __clang__
+
+	r = *(u8 *)ptr;
+
+	return r;
+}
+
+static inline u16 __OSf32tou16(register f32 arg)
+{
+	f32 a;
+	register f32 *ptr = &a;
+
+	u16 r;
+
+#ifdef __clang__
+	__asm__ ("psq_st %0, 0(%1), 1, 3" :: "f"(arg), "r"(ptr));
+#else
+	asm { psq_st arg, 0(ptr), TRUE, 3 };
+#endif // __clang__
+
+	r = *(u16 *)ptr;
+
+	return r;
+}
+
+static inline s16 __OSf32tos16(register f32 arg)
+{
+	f32 a;
+	register f32 *ptr = &a;
+
+	s16 r;
+
+#ifdef __clang__
+	__asm__ ("psq_st %0, 0(%1), 1, 5" :: "f"(arg), "r"(ptr));
+#else
+	asm { psq_st arg, 0(ptr), TRUE, 5 };
+#endif // __clang__
+
+	r = *(s16 *)ptr;
+
+	return r;
+}
+
 static inline f32 __OSu16tof32(const u16 *arg)
 {
 	f32 ret;
@@ -55,21 +109,19 @@ static inline f32 __OSu16tof32(const u16 *arg)
 	return ret;
 }
 
-static inline u16 __OSf32tou16(f32 arg)
+static inline void OSf32tou8(const f32 *in, u8 *out)
 {
-	f32 a;
-	f32 *ptr = &a;
-
-	u16 r;
-	__asm__ ("psq_st %0, 0(%1), 1, 3" :: "f"(arg), "r"(ptr));
-	r = *(u16 *)ptr;
-
-	return r;
+	*out = __OSf32tou8(*in);
 }
 
 static inline void OSf32tou16(const f32 *in, u16 *out)
 {
 	*out = __OSf32tou16(*in);
+}
+
+static inline void OSf32tos16(const f32 *in, s16 *out)
+{
+	*out = __OSf32tos16(*in);
 }
 
 static inline void OSu16tof32(const u16 *in, f32 *out)

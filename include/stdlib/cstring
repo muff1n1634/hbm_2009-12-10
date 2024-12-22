@@ -13,6 +13,8 @@ namespace std
 		extern char *strcat(char *s1, const char *s2) __attribute__((nothrow));
 
 		extern int strcmp(const char *s1, const char *s2) __attribute__((nothrow));
+
+		extern void *memset(void *s, int c, std::size_t n) __attribute__((nothrow));
 	} // extern "C"
 } // namespace std
 

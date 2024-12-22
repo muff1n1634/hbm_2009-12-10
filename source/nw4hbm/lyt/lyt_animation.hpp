@@ -44,9 +44,22 @@ namespace nw4hbm { namespace lyt
 		// [SGLEA4]/GormitiDebug.elf:.debug_info::0x4851f4
 		struct AnimationInfo
 		{
+		// members
+		public:
 			u32		kind;	// size 0x04, offset 0x00
 			u8		num;	// size 0x01, offset 0x04
 			byte1_t	padding[3];
+
+		// static members
+		public:
+			static const byte4_t ANIM_INFO_PANE_PAIN_SRT = 'RLPA';
+			static const byte4_t ANIM_INFO_PANE_VERTEX_COLOR = 'RLVC';
+			static const byte4_t ANIM_INFO_PANE_VISIBILITY = 'RLVI';
+
+			static const byte4_t ANIM_INFO_MATERIAL_COLOR = 'RLMC';
+			static const byte4_t ANIM_INFO_MATERIAL_TEXTURE_PATTERN = 'RLTP';
+			static const byte4_t ANIM_INFO_MATERIAL_TEXTURE_SRT = 'RLTS';
+			static const byte4_t ANIM_INFO_MATERIAL_IND_TEX_SRT = 'RLIM';
 		}; // size 0x08
 
 		// [SGLEA4]/GormitiDebug.elf:.debug_info::0x485259
