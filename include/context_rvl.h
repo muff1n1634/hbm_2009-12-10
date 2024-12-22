@@ -1061,6 +1061,18 @@ typedef enum _GXTevKAlphaSel
 	GX_TEV_KASEL_K3_A
 } GXTevKAlphaSel;
 
+// from ogws
+// TODO: i see this in ketteiban dwarf, add that source
+typedef enum _GXTevKColorID
+{
+	GX_KCOLOR0,
+	GX_KCOLOR1,
+	GX_KCOLOR2,
+	GX_KCOLOR3,
+
+	GX_MAX_KCOLOR
+} GXTevKColorID;
+
 // [SPQE7T]/ISpyD.elf:.debug_info::0x1f105e
 typedef enum _GXTevMode
 {
@@ -1343,8 +1355,33 @@ typedef struct _GXTexObj
 	byte4_t dummy[8];
 } GXTexObj; // size 0x20
 
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x2b931e
+typedef struct _GXTlutObj
+{
+	byte4_t	dummy[3];
+} GXTlutObj; // size 0x0c
+
 void GXClearVtxDesc(void);
+int GXGetTexObjFmt(GXTexObj *);
+u16 GXGetTexObjHeight(GXTexObj *);
+u16 GXGetTexObjWidth(GXTexObj *);
+GXTexWrapMode GXGetTexObjWrapS(GXTexObj *);
+GXTexWrapMode GXGetTexObjWrapT(GXTexObj *);
+void *GXGetTexObjUserData(GXTexObj *);
+void GXInitTexObj(GXTexObj *, void *, u16, u16, GXTexFmt, GXTexWrapMode, GXTexWrapMode, GXBool);
+void GXInitTexObjCI(GXTexObj *, void *, u16, u16, GXTexFmt, GXTexWrapMode,
+                    GXTexWrapMode, GXBool, u32);
+void GXInitTexObjLOD(GXTexObj *, GXTexFilter, GXTexFilter,
+                     f32, f32, f32, GXBool,
+                     GXBool, GXAnisotropy);
+void GXInitTexObjTlut(GXTexObj *, u32);
+void GXInitTexObjWrapMode(GXTexObj *, GXTexWrapMode, GXTexWrapMode);
+void GXInitTexObjUserData(GXTexObj *, void *);
+void GXInitTlutObj(GXTlutObj *, void *, GXTlutFmt, u16);
 void GXLoadPosMtxImm(Mtx, int);
+void GXLoadTexMtxImm(const Mtx, u32, GXTexGenType);
+void GXLoadTexObj(GXTexObj *, int);
+void GXLoadTlut(GXTlutObj *, u32);
 void GXSetAlphaCompare(GXCompare, u8, GXAlphaOp, GXCompare, u8);
 void GXSetAlphaUpdate(GXBool);
 void GXSetBlendMode(GXBlendMode, GXBlendFactor, GXBlendFactor, GXLogicOp);
@@ -1354,13 +1391,9 @@ void GXSetCullMode(GXCullMode);
 void GXSetCurrentMtx(int);
 void GXSetDispCopyGamma(int);
 void GXSetFog(int, f32, f32, f32, f32, GXColor);
-void GXInitTexObj(GXTexObj *, void *, u16, u16, GXTexFmt, GXTexWrapMode, GXTexWrapMode, GXBool);
-void GXInitTexObjCI(GXTexObj *, void *, u16, u16, GXTexFmt, GXTexWrapMode,
-                    GXTexWrapMode, GXBool, u32);
-void GXInitTexObjLOD(GXTexObj *, GXTexFilter, GXTexFilter,
-                     f32, f32, f32, GXBool,
-                     GXBool, GXAnisotropy);
-void GXInitTexObjUserData(GXTexObj *, void *);
+void GXSetIndTexCoordScale(GXIndTexStageID, GXIndTexScale, GXIndTexScale);
+void GXSetIndTexMtx(GXIndTexMtxID, const Mtx23, s8);
+void GXSetIndTexOrder(GXIndTexStageID, GXTexCoordID, GXTexMapID);
 void GXSetLineWidth(u8, int);
 void GXSetNumChans(u8);
 void GXSetNumIndStages(u8);
@@ -1371,18 +1404,30 @@ void GXSetTevAlphaOp(GXTevStageID, GXTevOp, GXTevBias, GXTevScale, u8, GXTevRegI
 void GXSetTevColor(GXTevRegID, GXColor);
 void GXSetTevColorIn(GXTevStageID, GXTevColorArg, GXTevColorArg, GXTevColorArg, GXTevColorArg);
 void GXSetTevColorOp(GXTevStageID, GXTevOp, GXTevBias, GXTevScale, u8, GXTevRegID);
+void GXSetTevColorS10(GXTevRegID, GXColorS10);
 void GXSetTevDirect(GXTevStageID);
+void GXSetTevIndirect(GXTevStageID, GXIndTexStageID, GXIndTexFormat, GXIndTexBiasSel, GXIndTexMtxID, GXIndTexWrap, GXIndTexWrap, GXBool, GXBool, GXIndTexAlphaSel);
+void GXSetTevKAlphaSel(GXTevStageID, GXTevKAlphaSel);
+void GXSetTevKColor(GXTevKColorID, GXColor);
+void GXSetTevKColorSel(GXTevStageID, GXTevKColorSel);
 void GXSetTevOp(GXTevStageID, GXTevMode);
 void GXSetTevOrder(GXTevStageID, GXTexCoordID, GXTexMapID, GXChannelID);
 void GXSetTevSwapMode(GXTevStageID, GXTevSwapSel, GXTevSwapSel);
 void GXSetTevSwapModeTable(GXTevSwapSel, GXTevColorChan, GXTevColorChan, GXTevColorChan, GXTevColorChan);
 void GXSetTexCoordCylWrap(int, u8, u8);
+void GXSetTexCoordGen2(GXTexCoordID, GXTexGenType, GXTexGenSrc, u32, GXBool, u32);
 void GXSetTexCoordScaleManually(int, u8, u16, u16);
 void GXSetVtxAttrFmt(GXVtxFmt, GXAttr, GXCompCnt, GXCompType, u8);
 void GXSetVtxDesc(GXAttr, GXAttrType);
 void GXSetZMode(GXBool, GXCompare, GXBool);
 
 // ---
+
+static inline void GXSetTexCoordGen(GXTexCoordID dst_coord, GXTexGenType func,
+                                    GXTexGenSrc src_param, u32 mtx)
+{
+	GXSetTexCoordGen2(dst_coord, func, src_param, mtx, FALSE, 0x7d);
+}
 
 void GXBegin(GXPrimitive, GXVtxFmt, u16);
 

@@ -12,6 +12,9 @@
 #include "lyt_common.hpp"
 #include "lyt_types.hpp"
 
+#include "../math/math_types.hpp" // math::VEC2
+#include "../ut/ut_Color.hpp"
+
 #if 0
 #include <revolution/GX/GXEnum.h>
 #include <revolution/MTX/mtx.h>
@@ -25,6 +28,9 @@
 
 namespace nw4hbm { namespace lyt
 {
+	// forward declarations
+	class Material;
+
 	namespace detail
 	{
 		// [SGLEA4]/GormitiDebug.elf:.debug_info::0x47655f
@@ -192,8 +198,8 @@ namespace nw4hbm { namespace lyt
 		u8 GetBias() const { return (op >> 4) & 0x03; }
 		u8 GetOp() const { return op & 0x0f; }
 
-		u8 GetKSel() const { return (cl >> 4) & 0x0f; }
-		u8 GetOutReg() const { return (cl >> 2) & 0x03; }
+		u8 GetKSel() const { return (cl >> 3) & 0x1f; }
+		u8 GetOutReg() const { return (cl >> 1) & 0x03; }
 		bool IsClamp() const { return static_cast<bool>(cl & 0x01); }
 
 		// sethods
@@ -298,7 +304,7 @@ namespace nw4hbm { namespace lyt
 		GXTevKAlphaSel GetKAlphaSel() const { return static_cast<GXTevKAlphaSel>(alpIn.GetKSel()); }
 
 		GXIndTexStageID GetIndStage() const { return static_cast<GXIndTexStageID>(indStage); }
-		GXIndTexMtxID GetIndMtxSel() const { return static_cast<GXIndTexMtxID>((indBiMt >> 3) & 0x07); }
+		GXIndTexMtxID GetIndMtxSel() const { return static_cast<GXIndTexMtxID>((indBiMt >> 3) & 0x0f); }
 		GXIndTexBiasSel GetIndBiasSel() const { return static_cast<GXIndTexBiasSel>(indBiMt & 0x07); }
 		GXIndTexWrap GetIndWrapS() const { return static_cast<GXIndTexWrap>(indWrap & 0x07); }
 		GXIndTexWrap GetIndWrapT() const { return static_cast<GXIndTexWrap>((indWrap >> 3) & 0x07); }
@@ -444,7 +450,7 @@ namespace nw4hbm { namespace lyt
 		}
 		GXCompare GetComp1() const
 		{
-			return static_cast<GXCompare>((comp >> 4) & 0x07);
+			return static_cast<GXCompare>((comp >> 4) & 0x0f);
 		}
 
 		GXAlphaOp GetOp() const { return static_cast<GXAlphaOp>(op); }
@@ -509,10 +515,10 @@ namespace nw4hbm { namespace lyt
 
 	// members
 	private:
-		u8	type;		// offset 0x00, size 0x01	// GXBlendMode
-		u8	srcFactor;	// offset 0x01, size 0x01	// GXBlendFactor
-		u8	dstFactor;	// offset 0x02, size 0x01	// GXBlendFactor
-		u8	op;			// offset 0x03, size 0x01	// GXLogicOp
+		u8	type;		// offset 0x00, size 0x01 // GXBlendMode
+		u8	srcFactor;	// offset 0x01, size 0x01 // GXBlendFactor
+		u8	dstFactor;	// offset 0x02, size 0x01 // GXBlendFactor
+		u8	op;			// offset 0x03, size 0x01 // GXLogicOp
 	}; // size 0x04
 
 	// [SGLEA4]/GormitiDebug.elf:.debug_info::0x48f131
@@ -610,12 +616,10 @@ namespace nw4hbm { namespace lyt
 		u8 GetTexSRTCap() const { return mGXMemCap.texSRT; }
 		u8 GetTexCoordGenCap() const { return mGXMemCap.texCoordGen; }
 		u8 GetIndTexSRTCap() const { return mGXMemCap.indSRT; }
-		// GetIndStageCap
 		bool IsTevSwapCap() const
 		{
 			return static_cast<bool>(mGXMemCap.tevSwap);
 		}
-		// GetTevStageCap
 		bool IsBlendModeCap() const
 		{
 			return static_cast<bool>(mGXMemCap.blendMode);
@@ -668,7 +672,6 @@ namespace nw4hbm { namespace lyt
 
 		void GetTexture(GXTexObj *pTexObj, u8 texMapIdx) const;
 
-		// set methods
 		void SetTextureNum(u8 num);
 		void SetTexCoordGenNum(u8 num);
 		void SetIndStageNum(u8 num);
@@ -696,7 +699,6 @@ namespace nw4hbm { namespace lyt
 			srtAry[eleIdx] = value;
 		}
 
-		// methods
 		void Init();
 		void InitBitGXNums(detail::BitGXNums *ptr);
 
