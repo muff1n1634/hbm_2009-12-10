@@ -5,15 +5,14 @@
  * headers
  */
 
-#include <macros.h>
-#include <types.h>
+#include <types.h> // u32
 
 #include "lyt_resourceAccessor.hpp"
 
 #include "../ut/ut_LinkList.hpp"
 
 #if 0
-#include <revolution/ARC/ARC.h>
+#include <revolution/ARC/arc.h> // ARCHandle
 #endif
 
 #include <context_rvl.h>
@@ -73,7 +72,7 @@ namespace nw4hbm { namespace lyt
 		ut::LinkListNode	mLink;				// offset 0x00, size 0x08
 		ARCHandle			mArcHandle;			// offset 0x08, size 0x1c
 		char				mResRootDir[128];	// offset 0x24, size 0x80
-	}; // size 0xa4? see SomeStruct in HBMBase.hpp
+	}; // size 0xa4
 
 	// [SGLEA4]/GormitiDebug.elf:.debug_info::0x47f88a
 	class ArcResourceAccessor : public ResourceAccessor

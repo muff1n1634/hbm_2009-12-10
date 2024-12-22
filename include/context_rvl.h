@@ -355,12 +355,35 @@ typedef struct ARCFileInfo
 	u32			length;			// size 0x04, offset 0x08
 } ARCFileInfo; // size 0x0c
 
+// [SPQE7T]/ISpyD.elf:.debug_info::0x3749e4
+typedef struct ARCDir
+{
+	ARCHandle	*handle;	// size 0x04, offset 0x00
+	u32			entryNum;	// size 0x04, offset 0x04
+	u32			location;	// size 0x04, offset 0x08
+	u32			next;		// size 0x04, offset 0x0c
+} ARCDir; // size 0x10
+
+// [SPQE7T]/ISpyD.elf:.debug_info::0x374a3e
+typedef struct ARCDirEntry
+{
+	ARCHandle	*handle;	// size 0x04, offset 0x00
+	u32			entryNum;	// size 0x04, offset 0x04
+	BOOL		isDir;		// size 0x04, offset 0x08
+	const char	*name;		// size 0x04, offset 0x0c
+} ARCDirEntry; // size 0x10
+
 BOOL ARCInitHandle(void *bin, ARCHandle *handle);
 BOOL ARCOpen(ARCHandle *handle, const char *filename, ARCFileInfo *af);
 BOOL ARCFastOpen(ARCHandle *handle, int entrynum, ARCFileInfo *af);
+s32 ARCConvertPathToEntrynum(ARCHandle *handle, const char *path);
 void *ARCGetStartAddrInMem(ARCFileInfo *af);
 u32 ARCGetLength(ARCFileInfo *af);
 BOOL ARCClose(ARCFileInfo *af);
+BOOL ARCChangeDir(ARCHandle *handle, const char *dirname);
+BOOL ARCOpenDir(ARCHandle *handle, const char *dirname, ARCDir *dir);
+BOOL ARCReadDir(ARCDir *dir, ARCDirEntry *direntry);
+BOOL ARCCloseDir(ARCDir *dir);
 
 // [SPQE7T]/ISpyD.elf:.debug_info::0x36a6f8
 typedef void AXFrameCallback(void);
