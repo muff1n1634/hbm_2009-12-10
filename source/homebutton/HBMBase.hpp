@@ -9,15 +9,10 @@
 
 #include <types.h>
 
-#include "HBMController.hpp"
-#include "HBMAnmController.hpp"
+#include "HBMCommon.hpp"
 #include "HBMGUIManager.hpp"
-#include "HBMRemoteSpk.hpp"
 
-#include "../nw4hbm/lyt/lyt_arcResourceAccessor.hpp"
 #include "../nw4hbm/lyt/lyt_drawInfo.hpp"
-#include "../nw4hbm/lyt/lyt_layout.hpp"
-#include "../nw4hbm/ut/ut_ResFont.hpp"
 
 #if 0
 #include <revolution/AXFX/AXFX.h>
@@ -30,10 +25,21 @@
  * classes and functions
  */
 
+// forward declarations
+namespace nw4hbm { namespace lyt { class ArcResourceAccessor; } }
+namespace nw4hbm { namespace lyt { class ArcResourceLink; } }
+namespace nw4hbm { namespace lyt { class Layout; } }
+namespace nw4hbm { namespace lyt { class MultiArcResourceAccessor; } }
+namespace nw4hbm { namespace lyt { class Pane; } }
+namespace nw4hbm { namespace ut { class ResFont; } }
+
 namespace homebutton
 {
 	// forward declarations
 	class HomeButton;
+	class Controller;
+	class GroupAnmController;
+	class RemoteSpk;
 
 	// [SGLEA4]/GormitiDebug.elf:.debug_info::0x47f957
 	class HomeButtonEventHandler : public gui::EventHandler
@@ -184,13 +190,12 @@ namespace homebutton
 		static void deleteInstance();
 
 #if HBM_APP_TYPE == HBM_APP_TYPE_NAND
+		void createInfoEx(const HBMDataInfoEx *pHBInfoEx);
+		void destroyInfoEx();
+
 		// wiiware variant? unspecific names and shit
 		const char *getBtnWarePaneName(int no) { return scBtnWareName[no]; }
-		bool isActive3() const;
-
-		void createInfoEx(void *pHBInfoEx);
-		void destroyInfoEx();
-		void set_other_text();
+		bool isThirdBarActive() const;
 #endif // HBM_APP_TYPE == HBM_APP_TYPE_NAND
 
 	// implementation details? at least i think that's what the snake case means
@@ -209,6 +214,9 @@ namespace homebutton
 
 		void set_config();
 		void set_text();
+#if HBM_APP_TYPE == HBM_APP_TYPE_NAND
+		void set_text_ex();
+#endif // HBM_APP_TYPE == HBM_APP_TYPE_NAND
 
 		void calc_fadeoutAnm();
 
@@ -226,10 +234,10 @@ namespace homebutton
 
 	// members
 	private: // offset goes dvd/nand
-		eSeq				mSequence;	// size 0x004, offset 0x000/0x000
-		const HBMDataInfo	*mpHBInfo;	// size 0x004, offset 0x004/0x004
+		eSeq				mSequence;		// size 0x004, offset 0x000/0x000
+		const HBMDataInfo	*mpHBInfo;		// size 0x004, offset 0x004/0x004
+		const HBMDataInfoEx	*mpHBInfoEx;	// size 0x004, offset 0x008/0x008
 
-		void	*mpHBInfoEx;							// size 0x004, offset 0x008/0x008
 		int		mButtonNum;								// size 0x004, offset 0x00c/0x00c
 		int		mAnmNum;								// size 0x004, offset 0x010/0x010
 		int		mState;									// size 0x004, offset 0x014/0x014
@@ -285,8 +293,8 @@ namespace homebutton
 		nw4hbm::lyt::ArcResourceAccessor		*mpResAccessor;							// size 0x004, offset 0x1ec/0x1f8
 #if HBM_APP_TYPE == HBM_APP_TYPE_NAND
 		nw4hbm::lyt::MultiArcResourceAccessor	*mpMultiResAccessor;					// size 0x004, offset -----/0x1fc
-		nw4hbm::lyt::ArcResourceLink			*at_0x200;								// size 0x004, offset -----/0x200
-		nw4hbm::lyt::ArcResourceLink			*at_0x204;								// size 0x004, offset -----/0x204
+		nw4hbm::lyt::ArcResourceLink			*mpHBInfoExLink;								// size 0x004, offset -----/0x200
+		nw4hbm::lyt::ArcResourceLink			*mpHBInfoLink;								// size 0x004, offset -----/0x204
 #endif
 		gui::PaneManager						*mpPaneManager;							// size 0x004, offset 0x1f0/0x208
 #if HBM_APP_TYPE == HBM_APP_TYPE_NAND
@@ -298,10 +306,10 @@ namespace homebutton
 		RemoteSpk								*mpRemoteSpk;							// size 0x004, offset 0x25c/0x278
 #if HBM_APP_TYPE == HBM_APP_TYPE_NAND
 		wchar_t									*at_0x27c[10][1];						// size 0x028, offset -----/0x27c // possibly fakematch?
-		nw4hbm::ut::ResFont						*at_0x2a4;								// size 0x008, offset -----/0x2a4
-		GXTexObj								at_0x2a8;								// size 0x020, offset -----/0x2a8
-		signed									at_0x2c8;								// size 0x004, offset -----/0x2c8
-		signed									at_0x2cc;								// size 0x004, offset -----/0x2cc
+		nw4hbm::ut::ResFont						*mpResFont2;								// size 0x008, offset -----/0x2a4
+		GXTexObj								mTexObj;								// size 0x020, offset -----/0x2a8
+		signed									mBar2AnmRev;								// size 0x004, offset -----/0x2c8
+		signed									mBar2AnmRevHold;								// size 0x004, offset -----/0x2cc
 #endif
 		GroupAnmController						*mpAnmController[12];					// size 0x030, offset 0x260/0x2d0
 		GroupAnmController						*mpGroupAnmController[74];				// size 0x128, offset 0x290/0x300
@@ -311,7 +319,7 @@ namespace homebutton
 #endif
 		BlackFader								mFader;									// size 0x010, offset 0x3f4/0x480
 #if HBM_APP_TYPE == HBM_APP_TYPE_DVD
-		/* 4 bytes padding */ // mFader ends at 0x404
+		/* 4 bytes padding */	// mFader ends at 0x404
 #endif
 		OSAlarm			mAlarm[WPAD_MAX_CONTROLLERS];			// size 0x0c0, offset 0x408/0x490
 		OSAlarm			mSpeakerAlarm[WPAD_MAX_CONTROLLERS];	// size 0x0c0, offset 0x4c8/0x550

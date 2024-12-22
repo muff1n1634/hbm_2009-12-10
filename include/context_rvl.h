@@ -162,14 +162,14 @@ typedef struct OSMutexLink
 	OSMutex	*prev;	// size 0x04, offset 0x04
 } OSMutexLink; // size 0x08
 
-enum OSThreadState
+typedef enum OSThreadState
 {
 	OS_THREAD_STATE_EXITED		= 0,
 	OS_THREAD_STATE_READY		= (1 << 0),
 	OS_THREAD_STATE_RUNNING		= (1 << 1),
 	OS_THREAD_STATE_SLEEPING	= (1 << 2),
 	OS_THREAD_STATE_MORIBUND	= (1 << 3),
-} typedef OSThreadState;
+} OSThreadState;
 
 typedef u16 OSThreadFlags;
 enum OSThreadFlags_et
@@ -242,6 +242,14 @@ typedef struct OSMessageQueue
 	s32				usedCount;		// size 0x04, offset 0x1c
 } OSMessageQueue; // size 0x20
 
+void OSInitMessageQueue(OSMessageQueue *msgQueue, OSMessage *buffer,
+                        int capacity);
+int OSSendMessage(OSMessageQueue *msgQueue, OSMessage msg,
+                  OSMessageFlags flags);
+int OSReceiveMessage(OSMessageQueue *msgQueue, OSMessage *msgOut,
+                     OSMessageFlags flags);
+int OSJamMessage(OSMessageQueue *msgQueue, OSMessage msg, OSMessageFlags flags);
+
 // [SPQE7T]/ISpyD.elf:.debug_info::0x2f63
 struct OSMutex
 {
@@ -251,13 +259,7 @@ struct OSMutex
 	OSMutexLink		link;		// size 0x08, offset 0x10
 }; // size 0x18
 
-void OSInitMessageQueue(OSMessageQueue *msgQueue, OSMessage *buffer,
-                        int capacity);
-int OSSendMessage(OSMessageQueue *msgQueue, OSMessage msg,
-                  OSMessageFlags flags);
-int OSReceiveMessage(OSMessageQueue *msgQueue, OSMessage *msgOut,
-                     OSMessageFlags flags);
-int OSJamMessage(OSMessageQueue *msgQueue, OSMessage msg, OSMessageFlags flags);
+void OSInitMutex(OSMutex *mutex);
 
 extern u32 OS_BUS_CLOCK ATTR_ADDRESS(0x800000f8);
 
@@ -319,6 +321,15 @@ typedef struct _AXVPB AXVPB;
 
 void AXInit(void);
 AXFrameCallback *AXRegisterCallback(AXFrameCallback *cb);
+void AXRegisterAuxACallback(AXAuxCallback *cb, void *context);
+void AXGetAuxACallback(AXAuxCallback **cbOut, void **contextOut);
+
+u16 AXGetAuxAReturnVolume(void);
+u16 AXGetAuxBReturnVolume(void);
+u16 AXGetAuxCReturnVolume(void);
+void AXSetAuxAReturnVolume(u16 volume);
+void AXSetAuxBReturnVolume(u16 volume);
+void AXSetAuxCReturnVolume(u16 volume);
 
 // [SPQE7T]/ISpyD.elf:.debug_info::0x36bdec
 typedef void *AXFXAllocFunc(size_t /* explicitly unnamed */);
@@ -391,6 +402,14 @@ typedef struct AXFX_REVERBHI
 	f32					crosstalk;		// size 0x004, offset 0x15c
 } AXFX_REVERBHI; // size 0x160
 
+void AXFXSetHooks(AXFXAllocFunc *alloc, AXFXFreeFunc *free);
+void AXFXGetHooks(AXFXAllocFunc **allocOut, AXFXFreeFunc **freeOut);
+BOOL AXFXReverbHiInit(AXFX_REVERBHI *reverbHi);
+BOOL AXFXReverbHiShutdown(AXFX_REVERBHI *reverbHi);
+
+// Available for use as the argument cb to AXRegisterAuxCallback
+void AXFXReverbHiCallback(void *data, void *context);
+
 // Matrix types
 
 typedef f32 Mtx23[2][3];
@@ -433,18 +452,22 @@ typedef const Vec2 *CVec2Ptr;
 typedef const Vec *CVecPtr;
 
 #if defined(NDEBUG)
-# define MTXInverse	PSMTXInverse
-# define MTXTrans	PSMTXTrans
+# define MTXIdentity	PSMTXIdentity
+# define MTXInverse		PSMTXInverse
+# define MTXTrans		PSMTXTrans
 
-# define MTXMultVec	PSMTXMultVec
+# define MTXMultVec		PSMTXMultVec
 #else
-# define MTXInverse	C_MTXInverse
-# define MTXTrans	C_MTXTrans
+# define MTXIdentity	C_MTXIdentity
+# define MTXInverse		C_MTXInverse
+# define MTXTrans		C_MTXTrans
 
-# define MTXMultVec	C_MTXMultVec
+# define MTXMultVec		C_MTXMultVec
 #endif
 
 void PSMTXIdentity(Mtx m);
+void C_MTXIdentity(Mtx m);
+
 void PSMTXCopy(CMtxPtr src, MtxPtr dst);
 void PSMTXConcat(CMtxPtr a, CMtxPtr b, MtxPtr ab);
 
@@ -458,6 +481,17 @@ void PSMTXMultVec(CMtxPtr m, CVecPtr src, VecPtr dst);
 void C_MTXMultVec(CMtxPtr m, CVecPtr src, VecPtr dst);
 
 // some are gormiti dwarf, some are i spy dwarf, some are the dwarf 1 megadump
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x48f80e
+typedef enum _GXAlphaOp
+{
+	GX_AOP_AND,
+	GX_AOP_OR,
+	GX_AOP_XOR,
+	GX_AOP_XNOR,
+
+	GX_MAX_ALPHAOP
+} GXAlphaOp;
 
 // TODO: get a specific source (name, game id)
 // TODO: check library version of game that has this
@@ -579,6 +613,21 @@ typedef enum _GXColorSrc
 	GX_SRC_VTX,
 } GXColorSrc;
 
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x45d66e
+typedef enum _GXCompare
+{
+	GX_NEVER,
+
+	GX_LESS,
+	GX_EQUAL,
+	GX_LEQUAL,
+	GX_GREATER,
+	GX_NEQUAL,
+	GX_GEQUAL,
+
+	GX_ALWAYS
+} GXCompare;
+
 // [SPQE7T]/ISpyD.elf:.debug_info::0x268cce
 typedef enum _GXCompCnt
 {
@@ -632,6 +681,105 @@ typedef enum _GXDiffuseFn
 	GX_DF_SIGN,
 	GX_DF_CLAMP,
 } GXDiffuseFn;
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x48fc70
+typedef enum _GXIndTexAlphaSel
+{
+	GX_ITBA_OFF,
+
+	GX_ITBA_S,
+	GX_ITBA_T,
+	GX_ITBA_U,
+
+	GX_MAX_ITBALPHA
+} GXIndTexAlphaSel;
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x48fb29
+typedef enum _GXIndTexBiasSel
+{
+	GX_ITB_NONE,
+
+	GX_ITB_S,
+	GX_ITB_T,
+	GX_ITB_ST,
+	GX_ITB_U,
+	GX_ITB_SU,
+	GX_ITB_TU,
+	GX_ITB_STU,
+
+	GX_MAX_ITBIAS
+} GXIndTexBiasSel;
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x48fac0
+typedef enum _GXIndTexFormat
+{
+	GX_ITF_8,
+	GX_ITF_5,
+	GX_ITF_4,
+	GX_ITF_3,
+
+	GX_MAX_ITFORMAT
+} GXIndTexFormat;
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x48ef62
+typedef enum _GXIndTexMtxID
+{
+	GX_ITM_OFF,
+
+	GX_ITM_0,
+	GX_ITM_1,
+	GX_ITM_2,
+
+	GX_ITM_S0 = 5,
+	GX_ITM_S1,
+	GX_ITM_S2,
+
+	GX_ITM_T0 = 9,
+	GX_ITM_T1,
+	GX_ITM_T2,
+} GXIndTexMtxID;
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x490652
+typedef enum _GXIndTexScale
+{
+	GX_ITS_1,
+	GX_ITS_2,
+	GX_ITS_4,
+	GX_ITS_8,
+	GX_ITS_16,
+	GX_ITS_32,
+	GX_ITS_64,
+	GX_ITS_128,
+	GX_ITS_256,
+
+	GX_MAX_ITSCALE
+} GXIndTexScale;
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x48fa37
+typedef enum _GXIndTexStageID
+{
+	GX_INDTEXSTAGE0,
+	GX_INDTEXSTAGE1,
+	GX_INDTEXSTAGE2,
+	GX_INDTEXSTAGE3,
+
+	GX_MAX_INDTEXSTAGE
+} GXIndTexStageID;
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x48fbd5
+typedef enum _GXIndTexWrap
+{
+	GX_ITW_OFF,
+
+	GX_ITW_256,
+	GX_ITW_128,
+	GX_ITW_64,
+	GX_ITW_32,
+	GX_ITW_16,
+	GX_ITW_0,
+
+	GX_MAX_ITWRAP
+} GXIndTexWrap;
 
 // [SPQE7T]/ISpyD.elf:.debug_info::0x1eeb49
 typedef enum _GXLightID
@@ -687,6 +835,147 @@ typedef enum _GXPrimitive
 	GX_QUADS			= 0x80, // 0x1000'0000
 } GXPrimitive;
 
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x490518
+typedef enum _GXTevAlphaArg
+{
+	GX_CA_APREV,
+
+	GX_CA_A0,
+	GX_CA_A1,
+	GX_CA_A2,
+
+	GX_CA_TEXA,
+	GX_CA_RASA,
+
+	GX_CA_KONST,
+	GX_CA_ZERO,
+	GX_CA_ONE,
+} GXTevAlphaArg;
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x48fe17
+typedef enum _GXTevBias
+{
+	GX_TB_ZERO,
+	GX_TB_ADDHALF,
+	GX_TB_SUBHALF,
+
+	GX_MAX_TEVBIAS
+} GXTevBias;
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x162cf3
+typedef enum _GXTevColorArg
+{
+	GX_CC_CPREV,
+	GX_CC_APREV,
+
+	GX_CC_C0,
+	GX_CC_A0,
+	GX_CC_C1,
+	GX_CC_A1,
+	GX_CC_C2,
+	GX_CC_A2,
+
+	GX_CC_TEXC,
+	GX_CC_TEXA,
+	GX_CC_RASC,
+	GX_CC_RASA,
+
+	GX_CC_ONE,
+	GX_CC_HALF,
+	GX_CC_KONST,
+	GX_CC_ZERO,
+
+	GX_CC_TEXRRR,
+	GX_CC_TEXGGG,
+	GX_CC_TEXBBB,
+
+	GX_CC_QUARTER	= GX_CC_KONST,
+} GXTevColorArg;
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x48f87f
+typedef enum _GXTevColorChan
+{
+	GX_CH_RED,
+	GX_CH_GREEN,
+	GX_CH_BLUE,
+	GX_CH_ALPHA
+} GXTevColorChan;
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x490211
+typedef enum _GXTevKColorSel
+{
+	GX_TEV_KCSEL_8_8,
+	GX_TEV_KCSEL_7_8,
+	GX_TEV_KCSEL_6_8,
+	GX_TEV_KCSEL_5_8,
+	GX_TEV_KCSEL_4_8,
+	GX_TEV_KCSEL_3_8,
+	GX_TEV_KCSEL_2_8,
+	GX_TEV_KCSEL_1_8,
+
+	GX_TEV_KCSEL_1 = GX_TEV_KCSEL_8_8,
+	GX_TEV_KCSEL_3_4 = GX_TEV_KCSEL_6_8,
+	GX_TEV_KCSEL_1_2 = GX_TEV_KCSEL_4_8,
+	GX_TEV_KCSEL_1_4 = GX_TEV_KCSEL_2_8,
+
+	GX_TEV_KCSEL_K0 = 12,
+	GX_TEV_KCSEL_K1,
+	GX_TEV_KCSEL_K2,
+	GX_TEV_KCSEL_K3,
+
+	GX_TEV_KCSEL_K0_R,
+	GX_TEV_KCSEL_K1_R,
+	GX_TEV_KCSEL_K2_R,
+	GX_TEV_KCSEL_K3_R,
+	GX_TEV_KCSEL_K0_G,
+	GX_TEV_KCSEL_K1_G,
+	GX_TEV_KCSEL_K2_G,
+	GX_TEV_KCSEL_K3_G,
+	GX_TEV_KCSEL_K0_B,
+	GX_TEV_KCSEL_K1_B,
+	GX_TEV_KCSEL_K2_B,
+	GX_TEV_KCSEL_K3_B,
+	GX_TEV_KCSEL_K0_A,
+	GX_TEV_KCSEL_K1_A,
+	GX_TEV_KCSEL_K2_A,
+	GX_TEV_KCSEL_K3_A,
+} GXTevKColorSel;
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x48ff5c2
+typedef enum _GXTevKAlphaSel
+{
+	GX_TEV_KASEL_8_8,
+	GX_TEV_KASEL_7_8,
+	GX_TEV_KASEL_6_8,
+	GX_TEV_KASEL_5_8,
+	GX_TEV_KASEL_4_8,
+	GX_TEV_KASEL_3_8,
+	GX_TEV_KASEL_2_8,
+	GX_TEV_KASEL_1_8,
+
+	GX_TEV_KASEL_1 = GX_TEV_KASEL_8_8,
+	GX_TEV_KASEL_3_4 = GX_TEV_KASEL_6_8,
+	GX_TEV_KASEL_1_2 = GX_TEV_KASEL_4_8,
+	GX_TEV_KASEL_1_4 = GX_TEV_KASEL_2_8,
+
+	GX_TEV_KASEL_K0_R = 16,
+	GX_TEV_KASEL_K1_R,
+	GX_TEV_KASEL_K2_R,
+	GX_TEV_KASEL_K3_R,
+	GX_TEV_KASEL_K0_G,
+	GX_TEV_KASEL_K1_G,
+	GX_TEV_KASEL_K2_G,
+	GX_TEV_KASEL_K3_G,
+	GX_TEV_KASEL_K0_B,
+	GX_TEV_KASEL_K1_B,
+	GX_TEV_KASEL_K2_B,
+	GX_TEV_KASEL_K3_B,
+	GX_TEV_KASEL_K0_A,
+	GX_TEV_KASEL_K1_A,
+	GX_TEV_KASEL_K2_A,
+	GX_TEV_KASEL_K3_A
+} GXTevKAlphaSel;
+
 // [SPQE7T]/ISpyD.elf:.debug_info::0x1f105e
 typedef enum _GXTevMode
 {
@@ -696,6 +985,46 @@ typedef enum _GXTevMode
 	GX_REPLACE,
 	GX_PASSCLR,
 } GXTevMode;
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x48fce7
+typedef enum _GXTevOp
+{
+	GX_TEV_ADD,
+	GX_TEV_SUB,
+
+	GX_TEV_COMP_R8_GT = 8,
+	GX_TEV_COMP_R8_EQ,
+	GX_TEV_COMP_GR16_GT,
+	GX_TEV_COMP_GR16_EQ,
+	GX_TEV_COMP_BGR24_GT,
+	GX_TEV_COMP_BGR24_EQ,
+	GX_TEV_COMP_RGB8_GT,
+	GX_TEV_COMP_RGB8_EQ,
+
+	GX_TEV_COMP_A8_GT = GX_TEV_COMP_RGB8_GT,
+	GX_TEV_COMP_A8_EQ = GX_TEV_COMP_RGB8_EQ,
+} GXTevOp;
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x48fef1
+typedef enum _GXTevRegID
+{
+	GX_TEVPREV,
+
+	GX_TEVREG0,
+	GX_TEVREG1,
+	GX_TEVREG2,
+
+	GX_MAX_TEVREG
+} GXTevRegID;
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x48fe77
+typedef enum _GXTevScale
+{
+	GX_TEV_SCALE_0,
+	GX_TEV_SCALE_1,
+	GX_TEV_SCALE_2,
+	GX_TEV_SCALE_3,
+} GXTevScale;
 
 // [SGLEA4]/GormitiDebug.elf:.debug_info::0x163019
 typedef enum _GXTevStageID
@@ -719,6 +1048,17 @@ typedef enum _GXTevStageID
 
 	GX_MAX_TEVSTAGE
 } GXTevStageID;
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x4905c4
+typedef enum _GXTevSwapSel
+{
+	GX_TEV_SWAP0,
+	GX_TEV_SWAP1,
+	GX_TEV_SWAP2,
+	GX_TEV_SWAP3,
+
+	GX_MAX_TEVSWAP
+} GXTevSwapSel;
 
 // [SGLEA4]/GormitiDebug.elf:.debug_info::0x14a955
 typedef enum _GXTexCoordID
@@ -750,7 +1090,7 @@ typedef enum _GXTexFilter
 } GXTexFilter;
 
 // [SPQE7T]/ISpyD.elf:.debug_info::0x28a5e5
-enum _GXTexFmt
+typedef enum _GXTexFmt
 {
 	GX_TF_I4		=  0,
 	GX_TF_I8		=  1,
@@ -785,7 +1125,54 @@ enum _GXTexFmt
 	GX_CTF_Z16L		= 60,
 
 	GX_TF_A8		= GX_CTF_A8
-} typedef GXTexFmt;
+} GXTexFmt;
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x14ab0b
+typedef enum _GXTexGenSrc
+{
+	GX_TG_POS,
+
+	GX_TG_NRM,
+	GX_TG_BINRM,
+	GX_TG_TANGENT,
+
+	GX_TG_TEX0,
+	GX_TG_TEX1,
+	GX_TG_TEX2,
+	GX_TG_TEX3,
+	GX_TG_TEX4,
+	GX_TG_TEX5,
+	GX_TG_TEX6,
+	GX_TG_TEX7,
+	GX_TG_TEXCOORD0,
+	GX_TG_TEXCOORD1,
+	GX_TG_TEXCOORD2,
+	GX_TG_TEXCOORD3,
+	GX_TG_TEXCOORD4,
+	GX_TG_TEXCOORD5,
+	GX_TG_TEXCOORD6,
+
+	GX_TG_COLOR0,
+	GX_TG_COLOR1
+} GXTexGenSrc;
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x14aa2f
+typedef enum _GXTexGenType
+{
+	GX_TG_MTX3x4,
+	GX_TG_MTX2x4,
+
+	GX_TG_BUMP0,
+	GX_TG_BUMP1,
+	GX_TG_BUMP2,
+	GX_TG_BUMP3,
+	GX_TG_BUMP4,
+	GX_TG_BUMP5,
+	GX_TG_BUMP6,
+	GX_TG_BUMP7,
+
+	GX_TG_SRTG,
+} GXTexGenType;
 
 // [SGLEA4]/GormitiDebug.elf:.debug_info::0x2b93e8
 typedef enum _GXTexMapID
@@ -855,6 +1242,15 @@ typedef struct _GXColor
 	u8	a;	// size 0x01, offset 0x03
 } GXColor; // size 0x04
 
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x4764f4
+typedef struct _GXColorS10
+{
+	s16	r;	// size 0x02, offset 0x00
+	s16	g;	// size 0x02, offset 0x02
+	s16	b;	// size 0x02, offset 0x04
+	s16	a;	// size 0x02, offset 0x06
+} GXColorS10; // size 0x08
+
 // [SGLEA4]/GormitiDebug.elf:.debug_info::0x2a52c2
 typedef struct _GXTexObj
 {
@@ -864,18 +1260,36 @@ typedef struct _GXTexObj
 
 void GXClearVtxDesc(void);
 void GXLoadPosMtxImm(Mtx, int);
+void GXSetAlphaCompare(GXCompare, u8, GXAlphaOp, GXCompare, u8);
+void GXSetAlphaUpdate(GXBool);
 void GXSetBlendMode(GXBlendMode, GXBlendFactor, GXBlendFactor, GXLogicOp);
-void GXSetChanCtrl(GXChannelID, GXBool, GXColorSrc, GXColorSrc, GXLightID,
-                   GXDiffuseFn, GXAttnFn);
+void GXSetChanCtrl(GXChannelID, GXBool, GXColorSrc, GXColorSrc, GXLightID, GXDiffuseFn, GXAttnFn);
 void GXSetCullMode(GXCullMode);
+void GXSetCurrentMtx(int);
+void GXSetDispCopyGamma(int);
+void GXSetFog(int, f32, f32, f32, f32, GXColor);
+void GXInitTexObj(GXTexObj *, void *, u16, u16, GXTexFmt, GXTexWrapMode, GXTexWrapMode, GXBool);
 void GXSetLineWidth(u8, int);
 void GXSetNumChans(u8);
+void GXSetNumIndStages(u8);
 void GXSetNumTevStages(u8);
 void GXSetNumTexGens(u8);
+void GXSetTevAlphaIn(GXTevStageID, GXTevAlphaArg, GXTevAlphaArg, GXTevAlphaArg, GXTevAlphaArg);
+void GXSetTevAlphaOp(GXTevStageID, GXTevOp, GXTevBias, GXTevScale, u8, GXTevRegID);
+void GXSetTevColor(GXTevRegID, GXColor);
+void GXSetTevColorIn(GXTevStageID, GXTevColorArg, GXTevColorArg, GXTevColorArg, GXTevColorArg);
+void GXSetTevColorOp(GXTevStageID, GXTevOp, GXTevBias, GXTevScale, u8, GXTevRegID);
 void GXSetTevOp(GXTevStageID, GXTevMode);
 void GXSetTevOrder(GXTevStageID, GXTexCoordID, GXTexMapID, GXChannelID);
+void GXSetTevSwapMode(GXTevStageID, GXTevSwapSel, GXTevSwapSel);
+void GXSetTevSwapModeTable(GXTevSwapSel, GXTevColorChan, GXTevColorChan, GXTevColorChan, GXTevColorChan);
+void GXSetTexCoordCylWrap(int, u8, u8);
+void GXSetTexCoordScaleManually(int, u8, u16, u16);
 void GXSetVtxAttrFmt(GXVtxFmt, GXAttr, GXCompCnt, GXCompType, u8);
 void GXSetVtxDesc(GXAttr, GXAttrType);
+void GXSetZMode(GXBool, GXCompare, GXBool);
+
+// ---
 
 void GXBegin(GXPrimitive, GXVtxFmt, u16);
 
@@ -901,6 +1315,12 @@ union WGPipe
 };
 
 extern volatile union WGPipe __WGPipe ATTR_ADDRESS(0xcc008000);
+
+inline void GXPosition2f32(f32 x, f32 y)
+{
+	__WGPipe.f32 = x;
+	__WGPipe.f32 = y;
+}
 
 inline void GXPosition3f32(f32 x, f32 y, f32 z)
 {
@@ -951,6 +1371,27 @@ static inline MEMiHeapHead *MEMCreateExpHeap(void *start, u32 size)
 	return MEMCreateExpHeapEx(start, size, 0);
 }
 
+typedef u32 SCStatus;
+enum SCStatus_et
+{
+	SC_STATUS_READY,
+	SC_STATUS_BUSY,
+	SC_STATUS_FATAL,
+	SC_STATUS_PARSE,
+};
+
+typedef u8 SCSoundMode;
+enum SCSoundMode_et
+{
+	SC_SND_MONO,
+	SC_SND_STEREO,
+	SC_SND_SURROUND
+};
+
+typedef void SCFlushCallback(SCStatus status);
+
+SCSoundMode SCGetSoundMode(void);
+
 // [SGLEA4]/GormitiDebug.elf:.debug_info::0xba189
 typedef struct TPLHeader
 {
@@ -994,6 +1435,9 @@ typedef struct TPLPalette
 	TPLDescriptor	*descriptorArray;	// size 0x04, offset 0x08
 } TPLPalette; // size 0x0c
 
+void VISetBlack(BOOL black);
+void VIFlush(void);
+
 typedef s32 WPADResult;
 enum WPADResult_et
 {
@@ -1034,7 +1478,7 @@ enum WPADChannel_et
 	WPAD_CHAN_INVALID		= -1
 };
 
-typedef s32 WPADDeviceType;
+typedef u32 WPADDeviceType;
 enum WPADDeviceType_et
 {
 	WPAD_DEV_CORE				=  0,
@@ -1203,8 +1647,11 @@ typedef struct WPADInfo
 	u8		firmware;	// size 0x01, offset 0x17
 } WPADInfo; // size 0x18
 
+BOOL WPADStartFastSimpleSync(void);
+BOOL WPADStopSimpleSync(void);
+WPADSimpleSyncCallback *WPADSetSimpleSyncCallback(WPADSimpleSyncCallback *cb);
 u8 WPADGetRadioSensitivity(WPADChannel chan);
-
+void WPADDisconnect(WPADChannel chan);
 WPADResult WPADProbe(WPADChannel chan, WPADDeviceType *devTypeOut);
 WPADConnectCallback *WPADSetConnectCallback(WPADChannel chan,
                                             WPADConnectCallback *cb);
@@ -1212,9 +1659,13 @@ WPADExtensionCallback *WPADSetExtensionCallback(WPADChannel chan,
                                                 WPADExtensionCallback *cb);
 WPADResult WPADGetInfoAsync(WPADChannel chan, WPADInfo *info, WPADCallback *cb);
 void WPADControlMotor(WPADChannel chan, WPADMotorCommand command);
+void WPADEnableMotor(BOOL enabled);
+BOOL WPADIsMotorEnabled(void);BOOL WPADSaveConfig(SCFlushCallback *cb);
 BOOL WPADIsSpeakerEnabled(WPADChannel chan);
 WPADResult WPADControlSpeaker(WPADChannel chan, WPADSpeakerCommand command,
                               WPADCallback *cb);
+u8 WPADGetSpeakerVolume(void);
+void WPADSetSpeakerVolume(u8 vol);
 BOOL WPADCanSendStreamData(WPADChannel chan);
 WPADResult WPADSendStreamData(WPADChannel chan, void *p_buf, u16 len);
 BOOL WPADIsUsedCallbackByKPAD(void);

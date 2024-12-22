@@ -61,6 +61,21 @@ typedef struct HBMDataInfo
 	MEMAllocator		*pAllocator;		// size 0x04, offset 0x3c
 } HBMDataInfo; // size 0x40
 
+#if HBM_APP_TYPE == HBM_APP_TYPE_DVD
+# define HBMDataInfoEx	void
+#elif HBM_APP_TYPE == HBM_APP_TYPE_NAND
+struct HBMDataInfoEx
+{
+	void		*layoutBuf;		// size 0x04, offset 0x00 // see homebutton::HomeButton::createInfoEx
+	void		*msgBuf;		// size 0x04, offset 0x04 // see homebutton::set_other_text
+	void		*texImage;		// size 0x04, offset 0x08
+	byte1_t		pad[4];
+	u16			texImageWidth;	// size 0x02, offset 0x10
+	u16			texImageHeight;	// size 0x02, offset 0x12
+	GXTexFmt	texImageFormat;	// size 0x04, offset 0x14
+}; // size 0x??
+#endif
+
 // [SGLEA4]/GormitiDebug.elf:.debug_info::0x30790d
 typedef struct HBMKPadData
 {

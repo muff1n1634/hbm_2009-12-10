@@ -1,7 +1,9 @@
 #ifndef __STDCXX_NEW__
 #define __STDCXX_NEW__
 
-#include <__internal/cxx_size_t.hpp>
+// IWYU pragma: always_keep (placement new)
+
+#include <__internal/std_size_t.hpp>
 
 inline void* operator new(std::size_t, void* ptr) __attribute__((nothrow))
 {

@@ -15,6 +15,7 @@
 // attributes
 
 #define ATTR_ALIGN(x)			__attribute__((aligned(x)))
+#define ATTR_FALLTHROUGH		/* no known attribute, but mwcc doesn't seem to care */
 #define ATTR_NOINLINE			__attribute__((never_inline))
 #define ATTR_UNUSED				__attribute__((unused))
 #define ATTR_WEAK				__attribute__((weak))
@@ -34,6 +35,8 @@
 #define IS_ALIGNED(x, align)	(((unsigned long)(x) & ((align) - 1)) == 0)
 
 #define ARRAY_LENGTH(x)			(sizeof (x) / sizeof ((x)[0]))
+
+#define BOOLIFY_TERNARY(x)		((x) ? 1 : 0)
 
 // Range-for loop macros
 

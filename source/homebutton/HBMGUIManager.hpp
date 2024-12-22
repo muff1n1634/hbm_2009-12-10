@@ -33,25 +33,6 @@ namespace homebutton { namespace gui
 	class Manager;
 	class PaneComponent;
 
-	// [SGLEA4]/GormitiDebug.elf:.debug_info::0x4779b0
-	class EventHandler // also see HBMBase.cpp
-	{
-	// methods
-	public:
-		// cdtors
-		EventHandler() {}
-
-		// virtual function ordering
-		// vtable EventHandler
-		virtual void onEvent(u32, u32, void *) {}
-		virtual void setManager(Manager *pManager) { mpManager = pManager; }
-
-	// members
-	protected: // HomeButtonEventHandler::onEvent
-		/* vtable */		// size 0x04, offset 0x00
-		Manager	*mpManager;	// size 0x04, offset 0x04
-	}; // size 0x08
-
 	// [SGLEA4]/GormitiDebug.elf:.debug_info::0x477921
 	class Interface
 	{
@@ -74,6 +55,25 @@ namespace homebutton { namespace gui
 	private:
 		/* vtable */	// size 0x04, offset 0x00
 	}; // size 0x04
+
+	// [SGLEA4]/GormitiDebug.elf:.debug_info::0x4779b0
+	class EventHandler // also see HBMBase.cpp
+	{
+	// methods
+	public:
+		// cdtors
+		EventHandler() {}
+
+		// virtual function ordering
+		// vtable EventHandler
+		virtual void onEvent(u32, u32, void *) {}
+		virtual void setManager(Manager *pManager) { mpManager = pManager; }
+
+	// members
+	protected: // HomeButtonEventHandler::onEvent
+		/* vtable */		// size 0x04, offset 0x00
+		Manager	*mpManager;	// size 0x04, offset 0x04
+	}; // size 0x08
 
 	// [SGLEA4]/GormitiDebug.elf:.debug_info::0x47786a
 	class Component : public Interface
