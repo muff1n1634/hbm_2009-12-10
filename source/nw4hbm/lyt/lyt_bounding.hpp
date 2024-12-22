@@ -11,8 +11,14 @@
  * classes and functions
  */
 
+// forward declarations
+namespace nw4hbm { namespace ut { namespace detail { class RuntimeTypeInfo; } } }
+
 namespace nw4hbm { namespace lyt
 {
+	// forward declarations
+	struct ResBlockSet;
+
 	namespace res
 	{
 		// [SGLEA4]/GormitiDebug.elf:.debug_info::0x489653
