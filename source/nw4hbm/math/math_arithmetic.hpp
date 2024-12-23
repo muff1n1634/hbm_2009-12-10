@@ -14,7 +14,7 @@
 #include <context_rvl.h>
 
 /*******************************************************************************
- * functions
+ * classes and functions
  */
 
 namespace nw4hbm { namespace math
@@ -46,6 +46,7 @@ namespace nw4hbm { namespace math
 	inline u16 F32ToU16(f32 x)
 	{
 		u16 rval;
+
 		OSf32tou16(&x, &rval);
 
 		return rval;
@@ -54,6 +55,7 @@ namespace nw4hbm { namespace math
 	inline f32 U16ToF32(u16 x)
 	{
 		f32 rval;
+
 		OSu16tof32(&x, &rval);
 
 		return rval;
