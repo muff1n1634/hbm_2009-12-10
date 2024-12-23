@@ -22,8 +22,8 @@ namespace nw4hbm { namespace lyt
 	// methods
 	public:
 		// cdtors
-		ResourceAccessor(void);
-		virtual ~ResourceAccessor(void);
+		ResourceAccessor();
+		virtual ~ResourceAccessor();
 
 		// virtual function ordering
 		// vtable ResourceAccessor
