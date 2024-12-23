@@ -10,16 +10,21 @@
 #include "lyt_common.hpp"
 #include "lyt_pane.hpp"
 
-#include "../math/math_types.hpp" // math::VEC2
 #include "../ut/ut_Color.hpp"
-#include "../ut/ut_RuntimeTypeInfo.hpp"
 
 /*******************************************************************************
  * classes and functions
  */
 
+// forward declarations
+namespace nw4hbm { namespace math { struct VEC2; } }
+namespace nw4hbm { namespace ut { namespace detail { class RuntimeTypeInfo; } } }
+
 namespace nw4hbm { namespace lyt
 {
+	// forward declarations
+	class Material;
+
 	// [SGLEA4]/GormitiDebug.elf:.debug_info::0x4780d3
 	struct InflationLRTB
 	{
