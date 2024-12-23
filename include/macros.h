@@ -30,14 +30,22 @@
 
 #define MIN(x, y)				((x) < (y) ? (x) : (y))
 
+#define CLAMP(x, low, high)		((x) < (low) ? (low) : (x) > (high) ? (high) : (x))
+
 #define ROUND_UP(x, align)		(((x) + ((align) - 1)) & -(align))
 
 #define IS_ALIGNED(x, align)	(((unsigned long)(x) & ((align) - 1)) == 0)
 
 #define ARRAY_LENGTH(x)			(sizeof (x) / sizeof ((x)[0]))
 
-#define BOOLIFY_TERNARY_TYPE(type_, exp_)	((exp_) ? (type_)1 : (type_)0)
-#define BOOLIFY_TERNARY(exp_)				BOOLIFY_TERNARY_TYPE(int, exp_)
+#define BOOLIFY_TRUE_TERNARY_TYPE(type_, exp_)	((exp_) ? (type_)1 : (type_)0)
+#define BOOLIFY_TRUE_TERNARY(exp_)				BOOLIFY_TRUE_TERNARY_TYPE(int, exp_)
+
+#define BOOLIFY_FALSE_TERNARY_TYPE(type_, exp_)	((exp_) ? (type_)0 : (type_)1)
+#define BOOLIFY_FALSE_TERNARY(exp_)				BOOLIFY_FALSE_TERNARY_TYPE(int, exp_)
+
+#define BOOLIFY_TERNARY_TYPE					BOOLIFY_TRUE_TERNARY_TYPE
+#define BOOLIFY_TERNARY							BOOLIFY_TRUE_TERNARY
 
 // math
 

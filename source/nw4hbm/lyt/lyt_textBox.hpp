@@ -11,6 +11,7 @@
 #include "lyt_pane.hpp"
 
 #include "../ut/ut_Color.hpp"
+#include "../ut/ut_Rect.hpp"
 
 /*******************************************************************************
  * classes and functions
@@ -20,6 +21,7 @@
 namespace nw4hbm { namespace ut { class Font; }}
 namespace nw4hbm { namespace ut { template <typename> class TagProcessorBase; }}
 namespace nw4hbm { namespace ut { template <typename> class TextWriterBase; }}
+namespace nw4hbm { namespace ut { namespace detail { class RuntimeTypeInfo; }}}
 
 namespace nw4hbm { namespace lyt
 {

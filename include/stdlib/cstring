@@ -17,6 +17,7 @@ namespace std
 		extern int strncmp(const char *s1, const char *s2, std::size_t n) __attribute__((nothrow));
 
 		extern void *memset(void *s, int c, std::size_t n) __attribute__((nothrow));
+		extern std::size_t strlen(const char *s) __attribute__((nothrow));
 	} // extern "C"
 } // namespace std
 
