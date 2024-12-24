@@ -28,9 +28,7 @@ namespace nw4hbm { namespace ut
 			// methods
 			bool IsDerivedFrom(const RuntimeTypeInfo *typeInfo) const
 			{
-				// NOTE: do not scope to for loop; stack is on r1
 				const RuntimeTypeInfo *self;
-
 				for (self = this; self; self = self->mParentTypeInfo)
 				{
 					if (self == typeInfo)
