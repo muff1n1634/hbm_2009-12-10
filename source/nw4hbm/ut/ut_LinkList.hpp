@@ -5,7 +5,7 @@
  * headers
  */
 
-#include <types.h> // nullptr
+#include <types.h>
 
 #include "ut_inlines.hpp" // NonCopyable
 
@@ -74,7 +74,6 @@ namespace nw4hbm { namespace ut
 					return *this;
 				}
 
-				LinkListNode &operator *() const;
 				LinkListNode *operator ->() const { return mPointer; }
 
 			// members
@@ -94,8 +93,8 @@ namespace nw4hbm { namespace ut
 			~LinkListImpl();
 
 			// methods
-			Iterator GetBeginIter() { return Iterator(mNode.GetNext()); }
-			Iterator GetEndIter() { return Iterator(&mNode); }
+			Iterator GetBeginIter() { return mNode.GetNext(); }
+			Iterator GetEndIter() { return &mNode; }
 
 			Iterator Insert(Iterator it, LinkListNode *p);
 
