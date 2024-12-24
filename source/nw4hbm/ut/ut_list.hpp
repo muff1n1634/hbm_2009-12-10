@@ -8,7 +8,7 @@
 #include <types.h>
 
 /*******************************************************************************
- * types
+ * classes and functions
  */
 
 namespace nw4hbm { namespace ut
