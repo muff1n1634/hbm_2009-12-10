@@ -44,6 +44,12 @@ typedef uint_least32_t	char32_t;
 // they are keywords
 #endif
 
+/* Nonstandard, but added because sometimes libraries use unsigned char to
+ * represent characters instead of plain char, which generates code for unsigned
+ * math. However, they are not UTF-8 characters and are therefore not char8_t.
+ */
+typedef unsigned char char_t;
+
 // Other types
 
 typedef unsigned long int	byte4_t;
