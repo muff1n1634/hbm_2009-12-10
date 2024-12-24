@@ -7,7 +7,6 @@
 
 #include <types.h>
 
-#include "ut_CharWriter.hpp"
 #include "ut_Font.hpp"
 
 #if 0
