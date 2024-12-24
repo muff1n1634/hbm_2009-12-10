@@ -77,4 +77,11 @@
 
 #endif // defined(__cplusplus)
 
+// more NW4R stuff
+
+#define NW4R_VERSION(major_, minor_)	\
+	((major_) << 8 | (minor_))
+
+#define NW4HBM_VERSION	NW4R_VERSION
+
 #endif // MACROS_H

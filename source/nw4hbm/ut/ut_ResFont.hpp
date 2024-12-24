@@ -15,7 +15,7 @@ namespace nw4hbm { namespace ut
 {
 	// forward declarations
 	struct FontInformation;
-	class BinaryFileHeader;
+	struct BinaryFileHeader;
 
 	// [SGLEA4]/GormitiDebug.elf:.debug_info::0x49b1f4
 	class ResFont : public detail::ResFontBase
@@ -23,8 +23,8 @@ namespace nw4hbm { namespace ut
 	// methods
 	public:
 		// cdtors
-		ResFont(void);
-		virtual ~ResFont(void);
+		ResFont();
+		virtual ~ResFont();
 
 		// methods
 		bool SetResource(void *brfnt);
