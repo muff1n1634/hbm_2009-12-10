@@ -19,14 +19,19 @@
 
 namespace nw4hbm { namespace math
 {
-	inline f32 FSelect(f32 cond, f32 ifPos, f32 ifNeg)
+	inline f32 FSelect(register f32 cond, register f32 ifPos,
+	                   register f32 ifNeg)
 	{
-		f32 ret;
+		register f32 ret;
 
+#ifdef __clang__
 		asm ("fsel %0, %1, %2, %3"
 			: "=f"(ret)
 			: "f"(cond), "f"(ifPos), "f"(ifNeg)
 		);
+#else
+		asm { fsel ret, cond, ifPos, ifNeg };
+#endif // __clang__
 
 		return ret;
 	}
