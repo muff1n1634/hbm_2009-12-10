@@ -1342,6 +1342,19 @@ typedef enum _GXVtxFmt
 	GX_MAX_VTXFMT
 } GXVtxFmt;
 
+/* Patent US 6,664,958 B1
+ * [2] https://patents.google.com/patent/US6664958B1
+ * section 15, lines 20-25
+ */
+typedef enum _GXZTexOp
+{
+	GX_ZT_DISABLE,
+	GX_ZT_ADD,
+	GX_ZT_REPLACE, // NOTE: misspelled as GZ_ZT_REPLACE in patent
+
+	GX_MAX_ZTEXOP
+} GXZTexOp;
+
 /* Name:
  * Patent US 6,937,245 B1
  * https://patents.google.com/patent/US6937245B1
@@ -1439,6 +1452,7 @@ void GXSetTexCoordScaleManually(int, u8, u16, u16);
 void GXSetVtxAttrFmt(GXVtxFmt, GXAttr, GXCompCnt, GXCompType, u8);
 void GXSetVtxDesc(GXAttr, GXAttrType);
 void GXSetZMode(GXBool, GXCompare, GXBool);
+void GXSetZTexture(GXZTexOp op, GXTexFmt fmt, u32 bias);
 
 // ---
 
@@ -1467,6 +1481,7 @@ static inline void GXEnd(void)
 
 union WGPipe
 {
+	u16 u16;
 	u32 u32;
 	f32 f32;
 };
@@ -1489,6 +1504,12 @@ inline void GXPosition3f32(f32 x, f32 y, f32 z)
 inline void GXColor1u32(u32 color)
 {
 	__WGPipe.u32 = color;
+}
+
+inline void GXTexCoord2u16(u16 u, u16 v)
+{
+	__WGPipe.u16 = u;
+	__WGPipe.u16 = v;
 }
 
 inline void GXTexCoord2f32(f32 u, f32 v)

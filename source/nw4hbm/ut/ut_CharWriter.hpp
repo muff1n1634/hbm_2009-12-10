@@ -42,7 +42,7 @@ namespace nw4hbm { namespace ut
 			NUM_OF_GRADMODE
 		};
 
-	// structs
+	// nested types
 	private:
 		// [SGLEA4]/GormitiDebug.elf:.debug_info::0x49b7d7
 		struct ColorMapping
@@ -154,7 +154,8 @@ namespace nw4hbm { namespace ut
 		void LoadTexture(const Glyph &glyph, GXTexMapID slot);
 		void UpdateVertexColor();
 
-		// static methods
+	// static methods
+	private:
 		static void SetupVertexFormat();
 
 		static void SetupGXDefault();
