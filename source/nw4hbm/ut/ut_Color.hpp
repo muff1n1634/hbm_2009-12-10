@@ -26,7 +26,7 @@ namespace nw4hbm { namespace ut
 	// methods
 	public:
 		// cdtors
-		Color() { *this = 0xfffffffful; }
+		Color() { *this = 0xffffffff; }
 		Color(u32 color) { *this = color; }
 		Color(const GXColor &color) { *this = color; }
 
@@ -53,6 +53,10 @@ namespace nw4hbm { namespace ut
 		{
 			return *reinterpret_cast<const u32 *>(this);
 		}
+
+	// members
+	public:
+		/* base GXColor */	// size 0x04, offset 0x00
 	} ATTR_ALIGN(4); // size 0x04
 }} // namespace nw4hbm::ut
 
