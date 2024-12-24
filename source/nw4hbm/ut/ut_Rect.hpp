@@ -7,10 +7,10 @@
 
 #include <types.h> // f32
 
-#include "../math/math_arithmetic.hpp"
+#include "../math/math_arithmetic.hpp" // math::FSelect
 
 /*******************************************************************************
- * class
+ * classes and functions
  */
 
 namespace nw4hbm { namespace ut
