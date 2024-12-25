@@ -1,9 +1,11 @@
 #ifndef __INTERNAL_STD_VA_LIST_HPP__
 #define __INTERNAL_STD_VA_LIST_HPP__
 
+// IWYU pragma: private, include <cstdarg>
+
 extern "C"
 {
-	typedef struct __va_arg_struct
+	typedef struct __va_list_struct
 	{
 		char gpr;
 		char fpr;
