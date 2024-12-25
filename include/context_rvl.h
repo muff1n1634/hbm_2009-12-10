@@ -391,10 +391,309 @@ typedef void AXFrameCallback(void);
 // [SPQE7T]/ISpyD.elf:.debug_info::0x36c40e
 typedef void AXAuxCallback(void *data, void *context);
 
-// TODO
-typedef struct _AXVPB AXVPB;
+typedef enum AXMixerCtrlFlags
+{
+	AX_MIXER_CTRL_L			= (1 << 0),
+	AX_MIXER_CTRL_R			= (1 << 1),
+	AX_MIXER_CTRL_DELTA		= (1 << 2),
+	AX_MIXER_CTRL_S			= (1 << 3),
+	AX_MIXER_CTRL_DELTA_S	= (1 << 4),
+
+	AX_MIXER_CTRL_A_L		= (1 << 16),
+	AX_MIXER_CTRL_A_R		= (1 << 17),
+	AX_MIXER_CTRL_A_DELTA	= (1 << 18),
+	AX_MIXER_CTRL_A_S		= (1 << 19),
+	AX_MIXER_CTRL_A_DELTA_S	= (1 << 20),
+
+	AX_MIXER_CTRL_B_L		= (1 << 21),
+	AX_MIXER_CTRL_B_R		= (1 << 22),
+	AX_MIXER_CTRL_B_DELTA	= (1 << 23),
+	AX_MIXER_CTRL_B_S		= (1 << 24),
+	AX_MIXER_CTRL_B_DELTA_S	= (1 << 25),
+
+	AX_MIXER_CTRL_C_L		= (1 << 26),
+	AX_MIXER_CTRL_C_R		= (1 << 27),
+	AX_MIXER_CTRL_C_DELTA	= (1 << 28),
+	AX_MIXER_CTRL_C_S		= (1 << 29),
+	AX_MIXER_CTRL_C_DELTA_S	= (1 << 30),
+} AXMixerCtrlFlags;
+
+typedef u32 AXVPBSrcType;
+enum AXVPBSrcType_et
+{
+	AX_SRC_TYPE_0,
+	AX_SRC_TYPE_1,
+	AX_SRC_TYPE_2,
+	AX_SRC_TYPE_3,
+	AX_SRC_TYPE_4TAP_16K,	/* name known from asserts */
+};
+
+typedef u32 AXVPBSyncFlags;
+enum AXVPBSyncFlags_et
+{
+	AX_VPB_SYNC_FLAG_SRC_TYPE				= (1 <<  0),
+	AX_VPB_SYNC_FLAG_MIXER_CTRL				= (1 <<  1),
+	AX_VPB_SYNC_FLAG_STATE					= (1 <<  2),
+	AX_VPB_SYNC_FLAG_TYPE					= (1 <<  3),
+	AX_VPB_SYNC_FLAG_MIX					= (1 <<  4),
+	AX_VPB_SYNC_FLAG_ITD					= (1 <<  5),
+	AX_VPB_SYNC_FLAG_ITD_TARGET				= (1 <<  6),
+	AX_VPB_SYNC_FLAG_DPOP					= (1 <<  7),
+	AX_VPB_SYNC_FLAG_VE						= (1 <<  8),
+	AX_VPB_SYNC_FLAG_VE_DELTA				= (1 <<  9),
+	AX_VPB_SYNC_FLAG_ADDR					= (1 << 10),
+	AX_VPB_SYNC_FLAG_ADDR_LOOP_FLAG			= (1 << 11),
+	AX_VPB_SYNC_FLAG_ADDR_LOOP_ADDR			= (1 << 12),
+	AX_VPB_SYNC_FLAG_ADDR_END_ADDR			= (1 << 13),
+	AX_VPB_SYNC_FLAG_ADDR_CURRENT_ADDR		= (1 << 14),
+	AX_VPB_SYNC_FLAG_ADPCM					= (1 << 15),
+	AX_VPB_SYNC_FLAG_SRC					= (1 << 16),
+	AX_VPB_SYNC_FLAG_SRC_RATIO				= (1 << 17),
+	AX_VPB_SYNC_FLAG_ADPCM_LOOP				= (1 << 18),
+	AX_VPB_SYNC_FLAG_LPF					= (1 << 19),
+	AX_VPB_SYNC_FLAG_LPF_COEFS				= (1 << 20),
+	AX_VPB_SYNC_FLAG_BIQUAD					= (1 << 21),
+	AX_VPB_SYNC_FLAG_BIQUAD_COEFS			= (1 << 22),
+	AX_VPB_SYNC_FLAG_RMT_ON					= (1 << 23),
+	AX_VPB_SYNC_FLAG_RMT_MIXER_CTRL			= (1 << 24),
+	AX_VPB_SYNC_FLAG_RMT_MIX				= (1 << 25),
+	AX_VPB_SYNC_FLAG_RMT_DPOP				= (1 << 26),
+	AX_VPB_SYNC_FLAG_RMT_SRC				= (1 << 27),
+	AX_VPB_SYNC_FLAG_RMT_IIR				= (1 << 28),
+	AX_VPB_SYNC_FLAG_RMT_IIR_LPF_COEFS		= (1 << 29),
+	AX_VPB_SYNC_FLAG_RMT_IIR_BIQUAD_COEFS	= (1 << 30),
+	AX_VPB_SYNC_FLAG_FULL_PB				= (1 << 31)
+};
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x82853
+typedef void AXVPBCallback(void *p);
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x82a39
+typedef struct _AXPBMIX
+{
+	u16	vL;				// size 0x02, offset 0x00
+	u16	vDeltaL;		// size 0x02, offset 0x02
+	u16	vR;				// size 0x02, offset 0x04
+	u16	vDeltaR;		// size 0x02, offset 0x06
+	u16	vAuxAL;			// size 0x02, offset 0x08
+	u16	vDeltaAuxAL;	// size 0x02, offset 0x0a
+	u16	vAuxAR;			// size 0x02, offset 0x0c
+	u16	vDeltaAuxAR;	// size 0x02, offset 0x0e
+	u16	vAuxBL;			// size 0x02, offset 0x10
+	u16	vDeltaAuxBL;	// size 0x02, offset 0x12
+	u16	vAuxBR;			// size 0x02, offset 0x14
+	u16	vDeltaAuxBR;	// size 0x02, offset 0x16
+	u16	vAuxCL;			// size 0x02, offset 0x18
+	u16	vDeltaAuxCL;	// size 0x02, offset 0x1a
+	u16	vAuxCR;			// size 0x02, offset 0x1c
+	u16	vDeltaAuxCR;	// size 0x02, offset 0x1e
+	u16	vS;				// size 0x02, offset 0x10
+	u16	vDeltaS;		// size 0x02, offset 0x12
+	u16	vAuxAS;			// size 0x02, offset 0x14
+	u16	vDeltaAuxAS;	// size 0x02, offset 0x16
+	u16	vAuxBS;			// size 0x02, offset 0x18
+	u16	vDeltaAuxBS;	// size 0x02, offset 0x1a
+	u16	vAuxCS;			// size 0x02, offset 0x1c
+	u16	vDeltaAuxCS;	// size 0x02, offset 0x1e
+} AXPBMIX; // size 0x30
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x82c05
+typedef struct _AXPBITD
+{
+	u16	flag;			// size 0x02, offset 0x00
+	u16	bufferHi;		// size 0x02, offset 0x02
+	u16	bufferLo;		// size 0x02, offset 0x04
+	u16	shiftL;			// size 0x02, offset 0x06
+	u16	shiftR;			// size 0x02, offset 0x08
+	u16	targetShiftL;	// size 0x02, offset 0x0a
+	u16	targetShiftR;	// size 0x02, offset 0x0c
+} AXPBITD; // size 0x0e
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x82c9a
+typedef struct _AXPBDPOP
+{
+	s16	aL;		// size 0x02, offset 0x00
+	s16	aAuxAL;	// size 0x02, offset 0x02
+	s16	aAuxBL;	// size 0x02, offset 0x04
+	s16	aAuxCL;	// size 0x02, offset 0x06
+	s16	aR;		// size 0x02, offset 0x08
+	s16	aAuxAR;	// size 0x02, offset 0x0a
+	s16	aAuxBR;	// size 0x02, offset 0x0c
+	s16	aAuxCR;	// size 0x02, offset 0x0e
+	s16	aS;		// size 0x02, offset 0x10
+	s16	aAuxAS;	// size 0x02, offset 0x12
+	s16	aAuxBS;	// size 0x02, offset 0x14
+	s16	aAuxCS;	// size 0x02, offset 0x16
+} AXPBDPOP; // size 0x18
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x82d6b
+typedef struct _AXPBVE
+{
+	u16	currentVolume;	// size 0x02, offset 0x00
+	s16	currentDelta;	// size 0x02, offset 0x02
+} AXPBVE; // size 0x04
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x82da9
+typedef struct _AXPBADDR
+{
+	u16	loopFlag;			// size 0x02, offset 0x00
+	u16	format;				// size 0x02, offset 0x02
+	u16	loopAddressHi;		// size 0x02, offset 0x04
+	u16	loopAddressLo;		// size 0x02, offset 0x06
+	u16	endAddressHi;		// size 0x02, offset 0x08
+	u16	endAddressLo;		// size 0x02, offset 0x0a
+	u16	currentAddressHi;	// size 0x02, offset 0x0c
+	u16	currentAddressLo;	// size 0x02, offset 0x0e
+} AXPBADDR; // size 0x10
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x825d6
+typedef struct _AXPBADPCM
+{
+	u16	a[8][2];	// size 0x20, offset 0x00
+	u16	gain;		// size 0x02, offset 0x20
+	u16	pred_scale;	// size 0x02, offset 0x22
+	u16	yn1;		// size 0x02, offset 0x24
+	u16	yn2;		// size 0x02, offset 0x26
+} AXPBADPCM; // size 0x28
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x82e72
+typedef struct _AXPBSRC
+{
+	u16	ratioHi;			// size 0x02, offset 0x00
+	u16	ratioLo;			// size 0x02, offset 0x02
+	u16	currentAddressFrac;	// size 0x02, offset 0x04
+	u16	last_samples[4];	// size 0x08, offset 0x06
+} AXPBSRC; // size 0x0e
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x82652
+typedef struct _AXPBADPCMLOOP
+{
+	u16	loop_pred_scale;	// size 0x02, offset 0x00
+	u16	loop_yn1;			// size 0x02, offset 0x02
+	u16	loop_yn2;			// size 0x02, offset 0x04
+} AXPBADPCMLOOP; // size 0x06
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x82ee9
+typedef struct _AXPBLPF
+{
+	u16	on;		// size 0x02, offset 0x00
+	u16	yn1;	// size 0x02, offset 0x02
+	u16	a0;		// size 0x02, offset 0x04
+	u16	b0;		// size 0x02, offset 0x06
+} AXPBLPF; // size 0x08
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x82f2e
+typedef struct _AXPBBIQUAD
+{
+	u16	on;		// size 0x02, offset 0x00
+	u16	xn1;	// size 0x02, offset 0x02
+	u16	xn2;	// size 0x02, offset 0x04
+	u16	yn1;	// size 0x02, offset 0x06
+	u16	yn2;	// size 0x02, offset 0x08
+	u16	b0;		// size 0x02, offset 0x0a
+	u16	b1;		// size 0x02, offset 0x0c
+	u16	b2;		// size 0x02, offset 0x0e
+	u16	a1;		// size 0x02, offset 0x10
+	u16	a2;		// size 0x02, offset 0x12
+} AXPBBIQUAD; // size 0x14
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x82fc7
+typedef struct _AXPBRMTMIX
+{
+	u16	vMain0;			// size 0x02, offset 0x00
+	u16	vDeltaMain0;	// size 0x02, offset 0x02
+	u16	vAux0;			// size 0x02, offset 0x04
+	u16	vDeltaAux0;		// size 0x02, offset 0x06
+	u16	vMain1;			// size 0x02, offset 0x08
+	u16	vDeltaMain1;	// size 0x02, offset 0x0a
+	u16	vAux1;			// size 0x02, offset 0x0c
+	u16	vDeltaAux1;		// size 0x02, offset 0x0e
+	u16	vMain2;			// size 0x02, offset 0x10
+	u16	vDeltaMain2;	// size 0x02, offset 0x12
+	u16	vAux2;			// size 0x02, offset 0x14
+	u16	vDeltaAux2;		// size 0x02, offset 0x16
+	u16	vMain3;			// size 0x02, offset 0x18
+	u16	vDeltaMain3;	// size 0x02, offset 0x1a
+	u16	vAux3;			// size 0x02, offset 0x1c
+	u16	vDeltaAux3;		// size 0x02, offset 0x1e
+} AXPBRMTMIX; // size 0x20
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x8310a
+typedef struct _AXPBRMTDPOP
+{
+	s16	aMain0;	// size 0x02, offset 0x00
+	s16	aMain1;	// size 0x02, offset 0x02
+	s16	aMain2;	// size 0x02, offset 0x04
+	s16	aMain3;	// size 0x02, offset 0x06
+	s16	aAux0;	// size 0x02, offset 0x08
+	s16	aAux1;	// size 0x02, offset 0x0a
+	s16	aAux2;	// size 0x02, offset 0x0c
+	s16	aAux3;	// size 0x02, offset 0x0e
+} AXPBRMTDPOP; // size 0x10
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x831a2
+typedef struct _AXPBRMTSRC
+{
+	u16	currentAddressFrac;	// size 0x02, offset 0x00
+	u16	last_samples[4];	// size 0x08, offset 0x02
+} AXPBRMTSRC; // size 0x0a
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x831f8
+typedef union __AXPBRMTIIR
+{
+	AXPBLPF		lpf;	// size 0x08
+	AXPBBIQUAD	biquad;	// size 0x14
+} __AXPBRMTIIR; // size 0x14
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x8286e
+typedef struct _AXPB
+{
+	u16				nextHi;			// size 0x002, offset 0x000 (0x028)
+	u16				nextLo;			// size 0x002, offset 0x002 (0x02a)
+	u16				currHi;			// size 0x002, offset 0x004 (0x02c)
+	u16				currLo;			// size 0x002, offset 0x006 (0x02e)
+	u16				srcSelect;		// size 0x002, offset 0x008 (0x030)
+	u16				coefSelect;		// size 0x002, offset 0x00a (0x032)
+	u32				mixerCtrl;		// size 0x004, offset 0x00c (0x034)
+	u16				state;			// size 0x002, offset 0x010 (0x038)
+	u16				type;			// size 0x002, offset 0x012 (0x03a)
+	AXPBMIX			mix;			// size 0x030, offset 0x014 (0x03c)
+	AXPBITD			itd;			// size 0x00e, offset 0x044 (0x06c)
+	AXPBDPOP		dpop;			// size 0x018, offset 0x052 (0x07a)
+	AXPBVE			ve;				// size 0x004, offset 0x06a (0x092)
+	AXPBADDR		addr;			// size 0x010, offset 0x06e (0x096)
+	AXPBADPCM		adpcm;			// size 0x028, offset 0x07e (0x0a6)
+	AXPBSRC			src;			// size 0x00e, offset 0x0a6 (0x0ce)
+	AXPBADPCMLOOP	adpcmLoop;		// size 0x006, offset 0x0b4 (0x0dc)
+	AXPBLPF			lpf;			// size 0x008, offset 0x0ba (0x0e2)
+	AXPBBIQUAD		biquad;			// size 0x014, offset 0x0c2 (0x0ea)
+	u16				remote;			// size 0x002, offset 0x0d6 (0x0fe)
+	u16				rmtMixerCtrl;	// size 0x002, offset 0x0d8 (0x100)
+	AXPBRMTMIX		rmtMix;			// size 0x020, offset 0x0da (0x102)
+	AXPBRMTDPOP		rmtDpop;		// size 0x010, offset 0x0fa (0x122)
+	AXPBRMTSRC		rmtSrc;			// size 0x00a, offset 0x10a (0x132)
+	__AXPBRMTIIR	rmtIIR;			// size 0x014, offset 0x114 (0x13c)
+	byte2_t			pad[12];
+} AXPB; // size 0x140
+
+// [SGLEA4]/GormitiDebug.elf:.debug_info::0x82773
+typedef struct _AXVPB
+{
+	void			*next;			// size 0x004, offset 0x000
+	void			*prev;			// size 0x004, offset 0x004
+	void			*next1;			// size 0x004, offset 0x008
+	u32				priority;		// size 0x004, offset 0x00c
+	AXVPBCallback	*callback;		// size 0x004, offset 0x010
+	register_t		userContext;	// size 0x004, offset 0x014
+	u32				index;			// size 0x004, offset 0x018
+	AXVPBSyncFlags	sync;			// size 0x004, offset 0x01c
+	u32				depop;			// size 0x004, offset 0x020
+	void			*itdBuffer;		// size 0x004, offset 0x024
+	AXPB			pb;				// size 0x140, offset 0x028
+} AXVPB; // size 0x168
 
 void AXInit(void);
+BOOL AXIsInit(void);
 AXFrameCallback *AXRegisterCallback(AXFrameCallback *cb);
 void AXRegisterAuxACallback(AXAuxCallback *cb, void *context);
 void AXGetAuxACallback(AXAuxCallback **cbOut, void **contextOut);
