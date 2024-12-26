@@ -7,7 +7,7 @@
 
 #include <types.h> // f32
 
-#include "syn.h" // HBMSYNVOICE
+#include "synvoice.h" // HBMSYNVOICE
 
 /*******************************************************************************
  * functions
