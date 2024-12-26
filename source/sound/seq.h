@@ -5,7 +5,6 @@
  * headers
  */
 
-#include <macros.h>
 #include <types.h>
 
 #include "syn.h" // HBMSYNSYNTH
