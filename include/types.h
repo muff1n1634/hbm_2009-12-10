@@ -58,6 +58,6 @@ typedef unsigned char		byte1_t;
 
 typedef byte1_t				byte_t;
 
-typedef unsigned int		register_t;
+typedef unsigned long int	register_t;
 
 #endif // TYPES_H

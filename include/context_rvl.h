@@ -700,6 +700,7 @@ typedef struct _AXVPB
 
 void AXInit(void);
 BOOL AXIsInit(void);
+AXVPB *AXAcquireVoice(u32 priority, AXVPBCallback *cb, register_t userContext);
 void AXFreeVoice(AXVPB *p);
 AXFrameCallback *AXRegisterCallback(AXFrameCallback *cb);
 void AXRegisterAuxACallback(AXAuxCallback *cb, void *context);
