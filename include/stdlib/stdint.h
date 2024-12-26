@@ -1,5 +1,5 @@
-#ifndef __STDC_STDINT_H__
-#define __STDC_STDINT_H__
+#ifndef __STDCXX_STDINT_H__
+#define __STDCXX_STDINT_H__
 
 typedef unsigned char uint8_t;
 typedef unsigned short uint16_t;
@@ -16,4 +16,4 @@ typedef unsigned short uint_least16_t;
 typedef unsigned long uint_least32_t;
 typedef unsigned long long uint_least64_t;
 
-#endif // __STDC_STDINT_H__
+#endif // __STDCXX_STDINT_H__
