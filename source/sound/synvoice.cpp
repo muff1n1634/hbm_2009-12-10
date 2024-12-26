@@ -30,7 +30,7 @@ void __HBMSYNClearVoiceReferences(void *p)
 
 	OSAssert_Line(27, p);
 
-	axvpb = p;
+	axvpb = (AXVPB *)p;
 	synth = (HBMSYNSYNTH *)axvpb->userContext;
 
 	index = HBMGetIndex(axvpb->index);

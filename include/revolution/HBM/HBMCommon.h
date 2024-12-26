@@ -64,7 +64,7 @@ typedef struct HBMDataInfo
 #if HBM_APP_TYPE == HBM_APP_TYPE_DVD
 # define HBMDataInfoEx	void
 #elif HBM_APP_TYPE == HBM_APP_TYPE_NAND
-struct HBMDataInfoEx
+typedef struct HBMDataInfoEx
 {
 	void		*layoutBuf;		// size 0x04, offset 0x00 // see homebutton::HomeButton::createInfoEx
 	void		*msgBuf;		// size 0x04, offset 0x04 // see homebutton::set_other_text
@@ -73,7 +73,7 @@ struct HBMDataInfoEx
 	u16			texImageWidth;	// size 0x02, offset 0x10
 	u16			texImageHeight;	// size 0x02, offset 0x12
 	GXTexFmt	texImageFormat;	// size 0x04, offset 0x14
-}; // size 0x??
+} HBMDataInfoEx; // size 0x??
 #endif
 
 // [SGLEA4]/GormitiDebug.elf:.debug_info::0x30790d
@@ -110,7 +110,7 @@ void HBMUpdateSound(void);
 
 #if HBM_APP_TYPE == HBM_APP_TYPE_NAND
 // guesses based on dealing with member homebutton::HomeButton::mpHBInfoEx
-void HBMCreateInfoEx(void *pHBInfoEx);
+void HBMCreateInfoEx(const HBMDataInfoEx *pHBInfoEx);
 void HBMDeleteInfoEx(void);
 #endif // HBM_APP_TYPE == HBM_APP_TYPE_NAND
 

@@ -210,7 +210,7 @@ void HBMUpdateSound()
 }
 
 #if HBM_APP_TYPE == HBM_APP_TYPE_NAND
-void HBMCreateInfoEx(void *pHBInfoEx)
+void HBMCreateInfoEx(const HBMDataInfoEx *pHBInfoEx)
 {
 	homebutton::HomeButton::getInstance()->createInfoEx(pHBInfoEx);
 }

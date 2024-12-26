@@ -54,7 +54,7 @@ char16_t CharStrmReader::ReadNextCharUTF8()
 	 * of the BMP; I think sticking to the BMP is fine here.
 	 */
 
-	return reinterpret_cast<char16_t>(code);
+	return static_cast<char16_t>(code);
 }
 
 char16_t CharStrmReader::ReadNextCharUTF16()
@@ -62,7 +62,7 @@ char16_t CharStrmReader::ReadNextCharUTF16()
 	byte2_t code = GetChar<char16_t>(0);
 	StepStrm<char16_t>(1);
 
-	return reinterpret_cast<char16_t>(code);
+	return static_cast<char16_t>(code);
 }
 
 char16_t CharStrmReader::ReadNextCharCP1252()
@@ -70,7 +70,7 @@ char16_t CharStrmReader::ReadNextCharCP1252()
 	byte2_t code = GetChar<char_t>(0);
 	StepStrm<char_t>(1);
 
-	return reinterpret_cast<char16_t>(code);
+	return static_cast<char16_t>(code);
 }
 
 char16_t CharStrmReader::ReadNextCharSJIS()
@@ -88,7 +88,7 @@ char16_t CharStrmReader::ReadNextCharSJIS()
 		StepStrm<char_t>(1);
 	}
 
-	return reinterpret_cast<char16_t>(code);
+	return static_cast<char16_t>(code);
 }
 
 }} // namespace nw4hbm::ut
