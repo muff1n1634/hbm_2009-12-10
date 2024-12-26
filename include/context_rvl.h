@@ -129,6 +129,12 @@ static inline void OSu16tof32(const u16 *in, f32 *out)
 	*out = __OSu16tof32(in);
 }
 
+#if defined(NDEBUG)
+# define OSCachedToPhysical(addr)	(void *)((u32)addr - 0x80000000)
+#endif
+
+void *(OSCachedToPhysical)(void *addr);
+
 typedef struct OSAlarm OSAlarm;
 typedef struct OSContext OSContext;
 
@@ -694,6 +700,7 @@ typedef struct _AXVPB
 
 void AXInit(void);
 BOOL AXIsInit(void);
+void AXFreeVoice(AXVPB *p);
 AXFrameCallback *AXRegisterCallback(AXFrameCallback *cb);
 void AXRegisterAuxACallback(AXAuxCallback *cb, void *context);
 void AXGetAuxACallback(AXAuxCallback **cbOut, void **contextOut);

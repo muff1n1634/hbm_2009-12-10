@@ -5,7 +5,6 @@
  * headers
  */
 
-#include <macros.h>
 #include <types.h>
 
 /*******************************************************************************
@@ -15,8 +14,8 @@
 #define NUM_MIDI_CHANNELS			16
 #define NUM_MIDI_NOTES				128
 
-// Allowed to be changed by the end user; known from error messages
-#define HBMSYN_INPUT_BUFFER_SIZE	256 /* name known from asserts */
+// Modifiable; to what extent is unknown
+#define HBMSYN_INPUT_BUFFER_SIZE	256	/* name known from asserts */
 
 /*******************************************************************************
  * types
@@ -28,9 +27,7 @@
 
 // forward declarations
 typedef struct HBMSYNSYNTH HBMSYNSYNTH;
-#ifndef RVL_SDK_HBM_SOUND_SYN_VOICE_H
 typedef struct HBMSYNVOICE HBMSYNVOICE;
-#endif
 
 // [SGLEA4]/GormitiDebug.elf:.debug_info::0x47dcb7
 typedef struct WTINST
