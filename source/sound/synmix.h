@@ -7,7 +7,7 @@
 
 #include <types.h> // s32
 
-#include "syn.h" // HBMSYNVOICE
+#include "synvoice.h" // HBMSYNVOICE
 
 /*******************************************************************************
  * external variables
@@ -18,8 +18,8 @@
 #endif
 
 // .data
-extern const s32 __HBMSYNVolumeAttenuation[128];
-extern const s32 __HBMSYNAttackAttnTable[100];
+extern s32 __HBMSYNVolumeAttenuation[];
+extern s32 __HBMSYNAttackAttnTable[];
 
 /*******************************************************************************
  * functions
