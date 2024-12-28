@@ -40,7 +40,9 @@ namespace nw4hbm { namespace lyt
 	// methods
 	public:
 		// cdtors
+		Group();
 		Group(const res::Group *pResGroup, Pane *pRootPane);
+
 		virtual ~Group();
 
 		// methods

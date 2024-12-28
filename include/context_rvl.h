@@ -2122,7 +2122,7 @@ enum WPADSpeakerCommand_et
 
 typedef void WPADCallback(WPADChannel chan, WPADResult result);
 typedef void WPADConnectCallback(WPADChannel chan, WPADResult result);
-typedef void WPADExtensionCallback(WPADChannel chan, WPADDeviceType devType);
+typedef void WPADExtensionCallback(WPADChannel chan, s32 devType);
 
 typedef void WUDSyncDeviceCallback(s32 result, s32 num);
 typedef WUDSyncDeviceCallback WPADSimpleSyncCallback;

@@ -516,7 +516,9 @@ void PaneComponent::draw()
 }
 
 #pragma push
-#pragma global_optimizer off // ... ok!
+#if defined(NDEBUG)
+# pragma global_optimizer off // ...ok!
+#endif
 
 static bool is_visible(nw4hbm::lyt::Pane *pPane)
 {

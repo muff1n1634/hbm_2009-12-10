@@ -70,7 +70,7 @@ void Controller::wpadConnectCallback(WPADChannel chan, WPADResult result)
 	}
 }
 
-void Controller::wpadExtensionCallback(WPADChannel chan, WPADDeviceType result)
+void Controller::wpadExtensionCallback(WPADChannel chan, s32 result)
 {
 	if (!sThis[chan])
 		return;
@@ -125,8 +125,8 @@ Controller::~Controller()
 
 void Controller::initCallback()
 {
-	int flag = WPADIsUsedCallbackByKPAD();
-	u32 type;
+	BOOL flag = WPADIsUsedCallbackByKPAD();
+	WPADDeviceType type;
 
 	WPADSetCallbackByKPAD(false);
 	mOldConnectCallback =
@@ -138,8 +138,7 @@ void Controller::initCallback()
 
 	mRumbleFlag = true;
 
-	// TODO: is WPADDeviceType actually a u32 instead of an s32?
-	switch (WPADProbe(mHBController.chan, (WPADDeviceType *)&type))
+	switch (WPADProbe(mHBController.chan, &type))
 	{
 	case WPAD_ESUCCESS:
 		mCallbackFlag = true;

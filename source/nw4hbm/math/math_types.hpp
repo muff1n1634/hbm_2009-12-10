@@ -124,6 +124,9 @@ namespace nw4hbm { namespace math
 	{
 	// methods
 	public:
+		// cdtors
+		MTX34() {} // NOTE: must be non-defaulted
+
 		// operators
 		operator MtxPtr() { return mtx; }
 		operator CMtxPtr() const { return mtx; }

@@ -94,8 +94,7 @@ namespace homebutton
 	// static methods
 	private:
 		static void wpadConnectCallback(WPADChannel chan, WPADResult result);
-		static void wpadExtensionCallback(WPADChannel chan,
-		                                  WPADDeviceType result);
+		static void wpadExtensionCallback(WPADChannel chan, s32 result);
 		static void soundOnCallback(OSAlarm *alm, OSContext *context);
 		static void ControllerCallback(WPADChannel chan, WPADResult result);
 
@@ -123,6 +122,6 @@ namespace homebutton
 		static Controller *sThis[WPAD_MAX_CONTROLLERS];
 		static bool sSetInfoAsync[WPAD_MAX_CONTROLLERS];
 	}; // size 0x48
-}
+} // namespace homebutton
 
 #endif // RVL_SDK_HBM_HOMEBUTTON_CONTROLLER_HPP

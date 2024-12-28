@@ -23,10 +23,12 @@
 
 namespace nw4hbm { namespace lyt {
 
+Group::Group() {}
+
 Group::Group(const res::Group *pResGroup, Pane *pRootPane)
 {
 	Init();
-	std::memcpy(&mName, &pResGroup->name, sizeof mName);
+	std::memcpy(mName, pResGroup->name, sizeof mName);
 
 	const char *paneName =
 		detail::ConvertOffsToPtr<char>(pResGroup, sizeof *pResGroup);
