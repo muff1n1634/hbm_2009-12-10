@@ -19,7 +19,10 @@
  * configuration
  */
 
-// You can use one of the defines here or set HBM_APP_TYPE in your build system.
+/* The macro HBM_APP_TYPE must be defined to one of these two values.
+ *
+ * You can use one of the defines here or set HBM_APP_TYPE in your build system.
+ */
 // #define HBM_APP_TYPE	HBM_APP_TYPE_DVD
 // #define HBM_APP_TYPE	HBM_APP_TYPE_NAND
 
