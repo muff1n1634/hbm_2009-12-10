@@ -881,8 +881,6 @@ void C_MTXScale(MtxPtr m, f32, f32, f32);
 void PSMTXMultVec(CMtxPtr m, CVecPtr src, VecPtr dst);
 void C_MTXMultVec(CMtxPtr m, CVecPtr src, VecPtr dst);
 
-// some are gormiti dwarf, some are i spy dwarf, some are the dwarf 1 megadump
-
 // [SGLEA4]/GormitiDebug.elf:.debug_info::0x48f80e
 typedef enum _GXAlphaOp
 {
@@ -904,9 +902,8 @@ typedef enum _GXAnisotropy
 	GX_MAX_ANISOTROPY
 } GXAnisotropy;
 
-// TODO: get a specific source (name, game id)
-// TODO: check library version of game that has this
-// dwarfv1_megadump.txt:1220088-1220092
+// NOTE: older GX version (Feb 24 2009 00:57:49)
+// [R89JEL]:/bin/RVL/Debug/mainD.elf:.debug::0x10044
 typedef enum _GXAttnFn
 {
 	GX_AF_SPEC,
@@ -1082,9 +1079,7 @@ typedef enum _GXCullMode
 	GX_CULL_ALL
 } GXCullMode;
 
-// TODO: get a specific source (name, game id)
-// TODO: check library version of game that has this
-// dwarfv1_megadump.txt:1220081-1220085
+// [SJXE41]/LynWiiRetail.elf:.debug_info::0xd838
 typedef enum _GXDiffuseFn
 {
 	GX_DF_NONE,
@@ -1387,8 +1382,8 @@ typedef enum _GXTevKAlphaSel
 	GX_TEV_KASEL_K3_A
 } GXTevKAlphaSel;
 
-// from ogws
-// TODO: i see this in ketteiban dwarf, add that source
+// NOTE: older GX version (Feb 24 2009 00:57:49)
+// [R89JEL]:/bin/RVL/Debug/mainD.elf:.debug::0x107e0
 typedef enum _GXTevKColorID
 {
 	GX_KCOLOR0,
